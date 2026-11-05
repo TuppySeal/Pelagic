@@ -1,0 +1,37 @@
+# Python environments and generated output
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+build/
+dist/
+packaging/cache/
+*.exe
+*.dll
+*.pyd
+*.zip
+*.7z
+*.log
+*.tmp
+
+# Local credentials and browser/user data
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*keyfile*
+*demo-key*
+*demo_key*
+passwords.dat
+autofill.dat
+keys.dat
+*.db
+*.sqlite*
+profiles/
+userdata/
+user_data/
+.claude/settings.local.json
+.DS_Store
+Thumbs.db

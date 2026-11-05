@@ -1,0 +1,69 @@
+# Development and repository guide
+
+## Run from source
+
+Use Python 3.10 or newer on Windows. From this repository's root:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python -m atlasbrowser
+```
+
+The source package retains its historical name, atlasbrowser. The public application is Pelagic. API keys belong in the app's encrypted settings or the documented environment variables, never in source files.
+
+## Organization
+
+| Path | Contents |
+| --- | --- |
+| atlasbrowser/ | Browser, AI providers/agent, UI and application assets |
+| tests/ | Standalone regression scripts; each script documents its purpose |
+| launcher/ | Windows launcher source and resource definitions |
+| packaging/ | PyInstaller specifications, Inno Setup scripts and version metadata |
+| playground/ | Standalone AI playground page |
+| website/ | Static installer download website |
+
+The existing feature guide is README.md. Legacy Wayfinder-named launcher/build definitions remain for compatibility. Generated binaries, environments and personal app data are excluded.
+
+## Verify changes
+
+```powershell
+python -m compileall -q atlasbrowser tests packaging/entry.py
+python tests/selftest.py
+```
+
+Run other tests relevant to the feature being changed; README.md lists the major suites. UI tests use temporary browser data and mock/local sites. Some require a working Qt WebEngine graphics environment.
+
+## Build Windows installers
+
+Install the requirements into the Python environment used for the build, then run:
+
+```powershell
+powershell -File packaging/build.ps1
+```
+
+The build script uses a packaging virtual environment with access to installed system packages, installs PyInstaller and yt-dlp, downloads FFmpeg, and builds dist/Pelagic. Install Inno Setup 6 to produce the installer and updater as well. This build has network dependencies and is not a pinned reproducible build.
+
+Publish generated installers as GitHub release assets. The current full installer is:
+
+https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe
+
+## Claude commits
+
+Open this checkout as Claude's working folder and keep CLAUDE.md in the repository root. Git identity is configured locally from the authenticated GitHub account, with its GitHub noreply address. Git Credential Manager handles authentication outside source control.
+
+```powershell
+git status --short
+git diff
+# Run the relevant checks, then stage the files that belong to your change.
+git add path/to/changed-file
+git diff --cached
+git commit -m "Describe the resulting change"
+git push origin main
+```
+
+If the linked Claude environment can edit files but cannot execute local Git, it cannot use Windows Credential Manager directly. Use Claude's supported local shell or GitHub connection; do not pass a token through chat. A source export alone does not grant Claude shell or GitHub access.
+
+## Source import
+
+The initial source import came from the existing local AtlasBrowser project identified by Claude, plus the current download website from Documents/Wayfinder. It preserves code and tests rather than reconstructing source from the installer. Installer binaries remain separately versioned release assets; the imported source can contain changes made after the original installer build.

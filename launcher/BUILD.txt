@@ -1,0 +1,1 @@
+# Build (MinGW): windres pelagic.rc -O coff -o pelagic.res && gcc -O2 -municode -mwindows -static -s pelagic.c pelagic.res -lshlwapi -ladvapi32 -lshell32 -o ../Pelagic.exe

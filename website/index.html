@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Download Pelagic</title>
+<meta name="description" content="Pelagic is a Windows web browser with a built-in AI assistant. Free download for Windows 10 and 11.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --sun:#E4F7F4; --surface:#7FE3DA; --teal:#1B8C9A; --deep:#0B4A6B; --abyss:#04162B; --hadal:#020A14;
+  --glow:#D8FFF7; --halo:#5FF0D6; --ink:#06253A; --ink-soft:#2C5566;
+  --text:#EAF8F7; --text-soft:#A9CDD3; --line:rgba(127,227,218,.18); --card:rgba(4,22,43,.5);
+  --f-display:"Outfit","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--hadal);color:var(--text);font-family:var(--f-body);font-size:17px;line-height:1.6}
+img{max-width:100%}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+a{color:var(--surface)}
+:focus-visible{outline:2px solid var(--halo);outline-offset:3px;border-radius:4px}
+
+.bar{position:sticky;top:0;z-index:5;background:rgba(4,22,43,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:16px;height:58px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:20px}
+.brand img{width:30px;height:30px}
+.bar .btn{margin-left:auto;padding:8px 16px;font-size:15px}
+
+.hero{background:linear-gradient(180deg,var(--sun) 0%,#BDEBE6 50%,#7CCFCB 100%);color:var(--ink)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center;padding-block:72px 80px}
+.kicker{font-family:var(--f-mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);font-weight:500}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.04em;margin:12px 0 16px;color:var(--abyss)}
+.hero p{margin:0;font-size:19px;color:var(--ink-soft);max-width:44ch}
+.dl{margin-top:28px;display:grid;gap:10px;justify-items:start}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:600;font-size:17px;padding:14px 24px;border-radius:12px;text-decoration:none;background:var(--abyss);color:var(--glow);border:0;cursor:pointer;transition:transform .15s ease,background .15s}
+.btn:hover{transform:translateY(-1px);background:#0a2440}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.big{font-size:19px;padding:16px 28px}
+.meta{font-family:var(--f-mono);font-size:13px;color:var(--deep)}
+.frame{background:#0d1620;border-radius:14px 14px 10px 10px;border:1px solid rgba(11,74,107,.25);box-shadow:0 30px 60px -20px rgba(2,10,20,.55);overflow:hidden}
+.frame .dots{display:flex;gap:6px;padding:9px 12px;background:#0a1119}
+.frame .dots i{width:9px;height:9px;border-radius:50%;background:#24333f}
+.frame img{display:block;width:100%;height:auto}
+
+section{padding-block:80px}
+h2{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4.5vw,44px);letter-spacing:-.03em;line-height:1.05;margin:0 0 12px}
+.lede{color:var(--text-soft);font-size:18px;max-width:60ch;margin:0 0 40px}
+
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.feat{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--card)}
+.feat h3{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0 0 6px;color:var(--surface)}
+.feat p{margin:0;color:var(--text-soft);font-size:16px}
+
+.gallery{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;margin-top:48px;align-items:start}
+.gallery .col{display:grid;gap:24px}
+figure{margin:0}
+figcaption{font-size:14px;color:var(--text-soft);margin-top:8px}
+.gallery .frame{border-color:rgba(127,227,218,.22)}
+
+.install{background:linear-gradient(180deg,var(--hadal),#04162B 40%,var(--hadal))}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:s}
+.steps li{counter-increment:s;border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--card)}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--surface);color:var(--abyss);font-family:var(--f-display);font-weight:700;margin-bottom:12px}
+.steps b{font-family:var(--f-display);font-size:19px;font-weight:600;display:block;margin-bottom:4px}
+.steps p{margin:0;color:var(--text-soft);font-size:16px}
+kbd,code{font-family:var(--f-mono);font-size:.85em}
+kbd{border:1px solid rgba(127,227,218,.3);border-bottom-width:2px;border-radius:5px;padding:0 5px;white-space:nowrap}
+
+.specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:40px}
+.spec{border:1px solid var(--line);border-radius:14px;padding:22px;background:var(--card);min-width:0}
+.spec h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0 0 10px}
+.spec dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;font-size:15.5px}
+.spec dt{color:var(--text-soft)}
+.spec dd{margin:0}
+.hash{display:flex;gap:8px;align-items:center;margin-top:4px}
+.hash code{flex:1;min-width:0;overflow-wrap:anywhere;color:var(--glow);font-size:12.5px;line-height:1.5}
+.copy{font-family:var(--f-body);font-size:13px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--surface);cursor:pointer;flex:none}
+.copy:hover{background:rgba(127,227,218,.1)}
+
+.final{text-align:center}
+.final img{width:96px;height:96px}
+.final .btn{background:var(--surface);color:var(--abyss)}
+.final .btn:hover{background:var(--glow)}
+.final .meta{color:var(--text-soft);margin-top:12px}
+footer{border-top:1px solid var(--line);color:var(--text-soft);font-size:14px}
+footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero .wrap,.gallery{grid-template-columns:1fr}
+  .feats,.steps{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  .hero .wrap{padding-block:44px 56px;gap:32px}
+  section{padding-block:56px}
+  .feats,.steps,.specs{grid-template-columns:1fr}
+  .bar .btn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="img/pelagic-icon.png" alt="">pelagic</a>
+    <a class="btn" data-download href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg><span>Download</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <div class="kicker">Version 1.0 · Windows</div>
+        <h1>Pelagic</h1>
+        <p>A full web browser with an AI assistant built in. Chat about the page you're on, or let the agent click and type through tasks for you.</p>
+        <div class="dl">
+          <a class="btn big" data-download href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download Pelagic for Windows</a>
+          <div class="meta">PelagicSetup-1.0.0.0.exe · 181 MB · Windows 10 &amp; 11 (64-bit)</div>
+        </div>
+      </div>
+      <div class="frame"><div class="dots"><i></i><i></i><i></i></div><img src="img/pelagic-preview.png" width="1340" height="820" alt="Pelagic browser window with tabs and the AI panel open"></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>What you get</h2>
+      <p class="lede">Everything you expect from an everyday browser, plus an assistant that can read and work with web pages.</p>
+      <div class="feats">
+        <div class="feat"><h3>Tabs your way</h3><p>Tab groups, vertical tabs, split view, workspaces and sleeping tabs that save memory.</p></div>
+        <div class="feat"><h3>AI chat</h3><p>Ask questions about the current page, summarize articles or translate them. Bring your own API key or run a local model.</p></div>
+        <div class="feat"><h3>Agent mode</h3><p>Describe a task and watch Pelagic browse, click and fill in forms. Passwords are never shown to the AI.</p></div>
+        <div class="feat"><h3>Built-in privacy</h3><p>Ad blocking, a password manager with breach checks and warnings for unsafe sites.</p></div>
+        <div class="feat"><h3>Familiar tools</h3><p>Bookmarks, history, downloads, reader mode, screenshots, picture-in-picture and spell check.</p></div>
+        <div class="feat"><h3>Your homepage</h3><p>Shortcuts, a search box and a background you choose.</p></div>
+      </div>
+
+      <div class="gallery">
+        <figure><div class="frame"><div class="dots"><i></i><i></i><i></i></div><img src="img/tabs-preview.png" width="1340" height="760" loading="lazy" alt="Pelagic with developer tools open"></div><figcaption>Built-in developer tools</figcaption></figure>
+        <div class="col">
+          <figure><div class="frame"><div class="dots"><i></i><i></i><i></i></div><img src="img/panel-chat-preview.png" width="810" height="855" loading="lazy" alt="The AI chat panel"></div><figcaption>The AI panel</figcaption></figure>
+        </div>
+      </div>
+      <figure style="margin-top:24px"><div class="frame"><div class="dots"><i></i><i></i><i></i></div><img src="img/homepage-preview.png" width="1280" height="760" loading="lazy" alt="Pelagic homepage with shortcuts"></div><figcaption>The homepage</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="install" id="install">
+    <div class="wrap">
+      <h2>Installing</h2>
+      <p class="lede">Takes about a minute. No account needed.</p>
+      <ol class="steps">
+        <li><b>Download</b><p>Click the download button and save <code>PelagicSetup-1.0.0.0.exe</code>.</p></li>
+        <li><b>Run the installer</b><p>If Windows shows "Windows protected your PC", click <b style="display:inline;font-size:inherit">More info</b> then <b style="display:inline;font-size:inherit">Run anyway</b>. This appears because the installer isn't code-signed yet.</p></li>
+        <li><b>Open Pelagic</b><p>Find it in the Start menu or on your desktop. To use AI features, add an API key in Settings.</p></li>
+      </ol>
+
+      <div class="specs">
+        <div class="spec">
+          <h3>Requirements</h3>
+          <dl>
+            <dt>System</dt><dd>Windows 10 or 11, 64-bit</dd>
+            <dt>Disk</dt><dd>About 500 MB free</dd>
+            <dt>AI</dt><dd>Optional. Your own API key (Claude, OpenAI, Gemini) or a local model</dd>
+          </dl>
+        </div>
+        <div class="spec">
+          <h3>File details</h3>
+          <dl>
+            <dt>File</dt><dd>PelagicSetup-1.0.0.0.exe</dd>
+            <dt>Size</dt><dd>189,332,917 bytes</dd>
+          </dl>
+          <div style="margin-top:10px;font-size:15.5px;color:var(--text-soft)">SHA-256</div>
+          <div class="hash"><code id="sha">d1a23613caf641b5a8d47ae11e24871f2a538cc11a2e63829d406d3105bab15c</code><button class="copy" type="button" id="copy">Copy</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <img src="img/pelagic-icon.png" alt="">
+      <h2>Ready to dive in?</h2>
+      <a class="btn big" data-download href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download Pelagic 1.0</a>
+      <div class="meta">Free · Windows 10 &amp; 11 · 181 MB</div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>Pelagic · a student project · 2026</span><a href="#top">Back to top ↑</a></div></footer>
+
+<script>
+// Where every download button points (the GitHub release). Change this one line for a new version.
+var DOWNLOAD_URL = "https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe";
+
+document.querySelectorAll("[data-download]").forEach(function (a) { a.href = DOWNLOAD_URL; });
+document.getElementById("copy").addEventListener("click", function () {
+  var b = this, t = document.getElementById("sha").textContent;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(
+    function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); },
+    function () { b.textContent = "Select it"; });
+});
+</script>
+</body>
+</html>
