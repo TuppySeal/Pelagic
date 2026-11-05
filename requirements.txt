@@ -1,1 +1,3 @@
 PySide6>=6.8
+# Linux (and other non-Windows systems): saved passwords, cards and API keys use the system keyring
+keyring>=24; sys_platform != "win32"

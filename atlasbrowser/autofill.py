@@ -1,4 +1,4 @@
-"""Addresses and payment cards: saved encrypted (DPAPI, like passwords), offered when a form field is focused, and
+"""Addresses and payment cards: saved encrypted (like passwords), offered when a form field is focused, and
 offered for saving after a form is sent.
 
 Like passwords, saved entries stay on the Python side until the user picks one to fill. Security codes (CVC) are
@@ -11,7 +11,6 @@ import base64
 import json
 import os
 import re
-import sys
 import threading
 import time
 import uuid
@@ -20,7 +19,7 @@ from pathlib import Path
 from PySide6.QtCore import QPoint, QTimer
 from PySide6.QtWidgets import QMenu
 
-from .store import _dpapi
+from .secretbox import protect, unprotect
 
 ADDRESS_FIELDS = ("name", "organization", "street", "street2", "city", "state", "postal", "country", "tel", "email")
 CARD_FIELDS = ("cc_name", "cc_number", "cc_month", "cc_year", "nickname")
@@ -66,7 +65,7 @@ def address_label(a: dict) -> str:
 
 
 class AutofillStore:
-    """{"addresses": [...], "cards": [...]} in autofill.dat, encrypted with the Windows account (plain off Windows)."""
+    """{"addresses": [...], "cards": [...]} in autofill.dat, encrypted (DPAPI on Windows, the system keyring elsewhere)."""
 
     def __init__(self, root: Path):
         self.path = Path(root) / "autofill.dat"
@@ -78,7 +77,7 @@ class AutofillStore:
             self._data = {"addresses": [], "cards": []}
             try:
                 raw = base64.b64decode(self.path.read_text())
-                plain = _dpapi(raw, False) if sys.platform == "win32" else raw
+                plain = unprotect(raw)
                 self._data.update(json.loads(plain.decode("utf-8")))
             except FileNotFoundError:
                 pass
@@ -91,7 +90,7 @@ class AutofillStore:
         if data.get("unreadable"):
             raise RuntimeError("The saved addresses and cards file could not be decrypted, so it was left untouched.")
         plain = json.dumps({"addresses": data["addresses"], "cards": data["cards"]}).encode("utf-8")
-        raw = _dpapi(plain, True) if sys.platform == "win32" else plain
+        raw = protect(plain)
         tmp = self.path.with_suffix(".tmp")
         tmp.write_text(base64.b64encode(raw).decode("ascii"))
         os.replace(tmp, self.path)

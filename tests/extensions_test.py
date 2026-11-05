@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if "--visible" not in sys.argv:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ["ATLASBROWSER_HOME"] = tempfile.mkdtemp(prefix="atlas_ext_test_")
+os.environ.setdefault("PELAGIC_PASSWORD_STORE", "basic")   # off Windows: a key file in that folder, not your keyring
 
 RESULTS = []
 

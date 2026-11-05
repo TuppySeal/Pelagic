@@ -2,6 +2,7 @@
 
 Run:  python tests/passwords_test.py          (add --visible to show the window)
 """
+import base64
 import json
 import os
 import sys
@@ -15,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if "--visible" not in sys.argv:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ["ATLASBROWSER_HOME"] = tempfile.mkdtemp(prefix="atlas_pw_test_")
+os.environ.setdefault("PELAGIC_PASSWORD_STORE", "basic")   # off Windows: a key file in that folder, not your keyring
 
 RESULTS = []
 
@@ -98,8 +100,7 @@ def main():
     check("other site does not match", not _matches("https://example.com", "https://evil-example.com"))
     check("lookup by origin", [x["username"] for x in ps.for_origin("https://www.example.com")] == ["me@x.com"])
     check("survives reload", PasswordStore(root).get(a["id"])["password"] == "hunter2")
-    if sys.platform == "win32":
-        check("file is encrypted", b"hunter2" not in (root / "passwords.dat").read_bytes())
+    check("file is encrypted", b"hunter2" not in base64.b64decode((root / "passwords.dat").read_bytes()))
     ps.update(a["id"], password="new-pass")
     check("update", PasswordStore(root).get(a["id"])["password"] == "new-pass")
     ps.add_never("https://bank.test")

@@ -193,7 +193,10 @@ def main(argv: list[str] | None = None) -> int:
     if sys.platform == 'win32':
         import ctypes
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('Pelagic.Desktop')
-    app.setWindowIcon(QIcon(str(Path(__file__).parent / 'assets' / 'pelagic.ico')))
+    else:
+        app.setDesktopFileName('pelagic')   # matches pelagic.desktop, so Linux docks show the right icon
+    icon = 'pelagic.ico' if sys.platform == 'win32' else 'pelagic.png'
+    app.setWindowIcon(QIcon(str(Path(__file__).parent / 'assets' / icon)))
     app.setApplicationName("Pelagic")
     app.setOrganizationName("AtlasBrowser")
     if _send_to_running(urls):
@@ -221,6 +224,12 @@ def main(argv: list[str] | None = None) -> int:
     server.newConnection.connect(on_connection)
 
     hub.open_profile(hub.profiles.last, urls or None)
+    from . import secretbox
+    problem = secretbox.available()
+    if problem and not store.get("keyring_warning_shown"):   # Linux without a keyring: once, so it isn't a surprise
+        from PySide6.QtWidgets import QMessageBox
+        store.set("keyring_warning_shown", True)
+        QTimer.singleShot(800, lambda: QMessageBox.warning(app.activeWindow(), "Pelagic", problem))
     app.setQuitOnLastWindowClosed(True)
     code = app.exec()
     hub.stop_all()

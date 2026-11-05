@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, 
                                QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QTabWidget,
                                QVBoxLayout, QWidget)
 
+from . import secretbox
 from .autofill import address_label, card_label, digits, luhn_ok
 
 ADDRESS_FORM = (("name", "Name"), ("organization", "Company"), ("street", "Street address"),
@@ -123,7 +124,7 @@ class AutofillDialog(QDialog):
             row.addStretch(1)
             v.addLayout(row)
             tabs.addTab(page, title)
-        note = QLabel("Saved on this computer, encrypted with your Windows account. "
+        note = QLabel(f"Saved on this computer, encrypted with {secretbox.where()}. "
                       "The AI never sees card details and never fills these in.")
         note.setObjectName("muted")
         note.setWordWrap(True)

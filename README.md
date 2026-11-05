@@ -8,8 +8,10 @@ A real Chromium browser (Qt WebEngine) with a built-in AI assistant and browsing
 ## Run
 `Pelagic.exe` (what the Desktop shortcut opens; Windows shows it as Pelagic with its own icon), `run.bat`, or `python -m atlasbrowser`. `Pelagic.exe` is a tiny launcher that runs `-m atlasbrowser` with your installed Python; its source is in `launcher/` (set `PELAGIC_PYTHON` if Python lives somewhere unusual). Needs Python 3.10+ and `pip install -r requirements.txt`.
 
+**Linux**: unpack `Pelagic-<version>-linux-x86_64.tar.gz` and run `./install.sh` (installs into `~/.local`, adds Pelagic to the applications menu; `./install.sh --remove` uninstalls). From source: `./run.sh` or `python3 -m atlasbrowser`. Browsing data lives in `~/.local/share/AtlasBrowser`. Saved passwords, cards and API keys are encrypted with a key kept in the system keyring (GNOME Keyring, KWallet, KeePassXC); without one Pelagic warns and won't save them, unless you start it with `PELAGIC_PASSWORD_STORE=basic` to keep the key in a file only your user can read. Install `ffmpeg` from your distribution for HD and MP3 YouTube downloads.
+
 ## AI
-Click the sparkle button (Ctrl+Shift+A). Add keys under the gear. Keys are encrypted with Windows DPAPI and also read from env vars (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, GROQ_API_KEY, ...).
+Click the sparkle button (Ctrl+Shift+A). Add keys under the gear. Keys are encrypted with Windows DPAPI (on Linux, with a key in the system keyring) and also read from env vars (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, GROQ_API_KEY, ...).
 
 The panel is the **agent**: describe a task or ask a question; it opens pages, clicks, types and scrolls while you watch (purple glow on the page) and answers from what it finds. Stop any time. Right-click selected text for "Ask Pelagic AI".
 
@@ -118,3 +120,5 @@ For devices with self-signed certificates (for example, `https://10.0.255.1`), P
 `python tests/sync_test.py` checks folder sync between two computers: merging, edits, deletions, and passphrase-encrypted passwords and cards.
 
 `python tests/certificate_selftest.py` checks certificate warnings and session trust against local HTTPS fixtures, including cancellation, navigation cleanup, private profiles, and changed certificates. It needs no additional dependencies.
+
+`python tests/secretbox_test.py` checks how saved secrets are encrypted off Windows (system keyring, the refusal without one, and the `PELAGIC_PASSWORD_STORE=basic` key file) using a fake keyring, on any system.

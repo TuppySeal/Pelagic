@@ -9,6 +9,7 @@ import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import time
 from datetime import date, datetime, timedelta
@@ -27,11 +28,13 @@ LIMIT = 3000
 
 # ------------------------------------------------------------------ Chrome
 def chrome_root() -> Path | None:
-    base = os.environ.get("LOCALAPPDATA")
-    if not base:
-        return None
-    root = Path(base) / "Google" / "Chrome" / "User Data"
-    return root if root.exists() else None
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA")
+        roots = [Path(base) / "Google" / "Chrome" / "User Data"] if base else []
+    else:
+        config = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+        roots = [config / "google-chrome", config / "chromium"]
+    return next((r for r in roots if r.exists()), None)
 
 
 def chrome_profiles(root: Path | None = None) -> list[tuple[str, Path]]:

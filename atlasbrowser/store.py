@@ -1,8 +1,7 @@
-"""Persistent app data: settings, bookmarks, history, API keys (DPAPI-encrypted)."""
+"""Persistent app data: settings, bookmarks, history, API keys (encrypted: DPAPI on Windows, see secretbox)."""
 from __future__ import annotations
 
 import base64
-import ctypes
 import json
 import os
 import re
@@ -10,7 +9,6 @@ import sqlite3
 import sys
 import threading
 import time
-from ctypes import wintypes
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -46,8 +44,16 @@ SEARCH_ENGINES = {
 
 def data_dir() -> Path:
     override = os.environ.get("ATLASBROWSER_HOME")
-    base = Path(override) if override else Path(os.environ.get("LOCALAPPDATA", Path.home())) / "AtlasBrowser"
-    base.mkdir(parents=True, exist_ok=True)
+    if override:
+        base = Path(override)
+    elif sys.platform == "win32":
+        base = Path(os.environ.get("LOCALAPPDATA", Path.home())) / "AtlasBrowser"
+    else:
+        # ~/AtlasBrowser if an earlier version made it there, else $XDG_DATA_HOME (~/.local/share)/AtlasBrowser
+        legacy = Path.home() / "AtlasBrowser"
+        xdg = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+        base = legacy if legacy.is_dir() else Path(xdg) / "AtlasBrowser"
+    base.mkdir(mode=0o700, parents=True, exist_ok=True)
     return base
 
 
@@ -64,26 +70,8 @@ def _load_json(path: Path, default):
         return default
 
 
-# ---------------------------------------------------------------- DPAPI
-class _Blob(ctypes.Structure):
-    _fields_ = [("cbData", wintypes.DWORD), ("pbData", ctypes.POINTER(ctypes.c_char))]
-
-
-def _dpapi(data: bytes, protect: bool) -> bytes:
-    crypt32, kernel32 = ctypes.windll.crypt32, ctypes.windll.kernel32
-    kernel32.LocalFree.argtypes = [ctypes.c_void_p]
-    buf = ctypes.create_string_buffer(data, len(data))
-    blob_in = _Blob(len(data), ctypes.cast(buf, ctypes.POINTER(ctypes.c_char)))
-    blob_out = _Blob()
-    fn = crypt32.CryptProtectData if protect else crypt32.CryptUnprotectData
-    args = (ctypes.byref(blob_in), "AtlasBrowser", None, None, None, 0, ctypes.byref(blob_out)) if protect else \
-        (ctypes.byref(blob_in), None, None, None, None, 0, ctypes.byref(blob_out))
-    if not fn(*args):
-        raise ctypes.WinError()
-    try:
-        return ctypes.string_at(blob_out.pbData, blob_out.cbData)
-    finally:
-        kernel32.LocalFree(blob_out.pbData)
+# ---------------------------------------------------------------- encryption (DPAPI on Windows; see secretbox)
+from .secretbox import KeyringMissing, _dpapi, protect, unprotect  # noqa: E402,F401
 
 
 # AI provider and agent settings shared by every profile (they live in the first profile's settings.json).
@@ -315,8 +303,11 @@ class Store:
             self._keys = {}
             try:
                 raw = base64.b64decode(self._key_file().read_text())
-                plain = _dpapi(raw, False) if sys.platform == "win32" else raw
+                plain = unprotect(raw)
                 self._keys = json.loads(plain.decode("utf-8"))
+            except KeyringMissing:
+                self._keys = None   # the key is out of reach (locked keyring): never overwrite keys.dat
+                return {}
             except Exception:
                 self._keys = {}
         return self._keys
@@ -331,10 +322,13 @@ class Store:
             return self.shared.set_key(pid, key)
         with self._lock:
             keys = self._load_keys()
+            if self._keys is None:
+                unprotect(base64.b64decode(self._key_file().read_text()))   # raises KeyringMissing with the reason
+                keys = self._load_keys()
             if key:
                 keys[pid] = key
             else:
                 keys.pop(pid, None)
             plain = json.dumps(keys).encode("utf-8")
-            raw = _dpapi(plain, True) if sys.platform == "win32" else plain
+            raw = protect(plain)
             self._key_file().write_text(base64.b64encode(raw).decode("ascii"))

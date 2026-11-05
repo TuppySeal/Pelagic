@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ["ATLASBROWSER_HOME"] = tempfile.mkdtemp(prefix="atlas_fileview_test_")
+os.environ.setdefault("PELAGIC_PASSWORD_STORE", "basic")   # off Windows: a key file in that folder, not your keyring
 
 RESULTS = []
 

@@ -1,7 +1,7 @@
 """YouTube and YouTube Music downloader (menu → Download video or audio…), using yt-dlp.
 
 Video: the best quality up to the size you pick, as .mp4. Audio: .mp3 (or .m4a when ffmpeg isn't there).
-Full HD and up, and MP3, need ffmpeg: it's looked for next to Pelagic (ffmpeg\\ffmpeg.exe) and on PATH. Without it
+Full HD and up, and MP3, need ffmpeg: it's looked for next to Pelagic (ffmpeg\\ffmpeg.exe, or ffmpeg/ffmpeg on Linux) and on PATH. Without it
 YouTube only offers single-file videos (often 360p).
 
 Downloading from YouTube is against YouTube's terms of service; this is for personal use.
@@ -35,7 +35,7 @@ def available() -> bool:
 def ffmpeg_path() -> str | None:
     here = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
     for p in (here / "ffmpeg" / "ffmpeg.exe", Path(sys.executable).parent / "ffmpeg" / "ffmpeg.exe",
-              here / "ffmpeg" / "ffmpeg"):
+              here / "ffmpeg" / "ffmpeg", Path(sys.executable).parent / "ffmpeg" / "ffmpeg"):
         if p.exists():
             return str(p)
     return shutil.which("ffmpeg")

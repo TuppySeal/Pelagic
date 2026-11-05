@@ -1,4 +1,4 @@
-"""Saved passwords: an encrypted store (DPAPI, like API keys), save/update prompts, autofill and import from Google.
+"""Saved passwords: an encrypted store (like API keys), save/update prompts, autofill and import from Google.
 
 Passwords stay on the Python side until the user picks an account to fill; page scripts only ever see what is
 filled into the form, and the AI agent never reads password fields (see pagejs) or receives anything from here.
@@ -9,7 +9,6 @@ import base64
 import csv
 import json
 import os
-import sys
 import threading
 import time
 import uuid
@@ -20,7 +19,7 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWebEngineCore import QWebEngineScript
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QMenu, QPushButton, QWidget
 
-from .store import _dpapi
+from .secretbox import protect, unprotect
 
 _APP_WORLD = QWebEngineScript.ScriptWorldId.ApplicationWorld
 GOOGLE_EXPORT_URL = "https://passwords.google.com/options?ep=1"
@@ -59,7 +58,7 @@ def _matches(saved: str, page: str) -> bool:
 
 
 class PasswordStore:
-    """Logins in passwords.dat, encrypted with the Windows account (DPAPI). Plain JSON off Windows (tests only)."""
+    """Logins in passwords.dat, encrypted with the Windows account (DPAPI) or the system keyring (secretbox)."""
 
     def __init__(self, root: Path):
         self.path = Path(root) / "passwords.dat"
@@ -72,7 +71,7 @@ class PasswordStore:
             self._data = {"logins": [], "never": []}
             try:
                 raw = base64.b64decode(self.path.read_text())
-                plain = _dpapi(raw, False) if sys.platform == "win32" else raw
+                plain = unprotect(raw)
                 self._data.update(json.loads(plain.decode("utf-8")))
             except FileNotFoundError:
                 pass
@@ -86,7 +85,7 @@ class PasswordStore:
         if data.get("unreadable"):
             raise RuntimeError("The saved passwords file could not be decrypted, so it was left untouched.")
         plain = json.dumps({"logins": data["logins"], "never": data["never"]}).encode("utf-8")
-        raw = _dpapi(plain, True) if sys.platform == "win32" else plain
+        raw = protect(plain)
         tmp = self.path.with_suffix(".tmp")
         tmp.write_text(base64.b64encode(raw).decode("ascii"))
         os.replace(tmp, self.path)

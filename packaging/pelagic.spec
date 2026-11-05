@@ -1,5 +1,7 @@
-# PyInstaller spec: one-folder, windowed Pelagic.exe. Build with packaging\build.ps1.
+# PyInstaller spec: one-folder, windowed Pelagic.exe. Build with packaging\build.ps1 (Windows) or
+# packaging/build_linux.sh (Linux, where it makes ./Pelagic).
 import os
+import sys
 
 from PyInstaller.utils.hooks import collect_submodules
 
@@ -11,7 +13,9 @@ a = Analysis(
     pathex=[ROOT],
     datas=[(ASSETS, 'atlasbrowser/assets')],
     # yt-dlp (the YouTube downloader) loads its site extractors by name, so list them all
-    hiddenimports=['PySide6.QtTest', 'PySide6.QtWebChannel'] + collect_submodules('yt_dlp'),
+    # off Windows, saved secrets use the system keyring (see atlasbrowser/secretbox.py); its backends load by name too
+    hiddenimports=['PySide6.QtTest', 'PySide6.QtWebChannel'] + collect_submodules('yt_dlp')
+                  + ([] if sys.platform == 'win32' else collect_submodules('keyring')),
     excludes=['tkinter', 'PySide6.Qt3DCore', 'PySide6.QtQuick3D', 'PySide6.QtCharts',
               'PySide6.QtDataVisualization', 'PySide6.QtMultimedia', 'PySide6.QtBluetooth'],
     noarchive=False,
@@ -35,8 +39,8 @@ exe = EXE(
     pyz, a.scripts, [],
     exclude_binaries=True,
     name='Pelagic',
-    icon=os.path.join(ASSETS, 'pelagic.ico'),
-    version=os.path.join(SPECPATH, 'version_info.txt'),
+    icon=os.path.join(ASSETS, 'pelagic.ico') if sys.platform == 'win32' else None,
+    version=os.path.join(SPECPATH, 'version_info.txt') if sys.platform == 'win32' else None,
     console=False,
     upx=False,
 )

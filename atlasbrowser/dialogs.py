@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, 
                                QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox,
                                QPushButton, QSpinBox, QTabWidget, QVBoxLayout, QWidget)
 
-from . import providers
+from . import providers, secretbox
 from .agent import run_in_pool
 from .store import SEARCH_ENGINES
 
@@ -180,7 +180,7 @@ class SettingsDialog(QDialog):
         if pid in self.pending_keys:
             self.key_hint.setText("New key will be saved when you press OK.")
         elif saved:
-            self.key_hint.setText("A key is saved (encrypted for your Windows account). Leave blank to keep it.")
+            self.key_hint.setText(f"A key is saved (encrypted with {secretbox.where()}). Leave blank to keep it.")
         elif env:
             self.key_hint.setText(f"Using the {env} environment variable. Enter a key here to override.")
         elif not p.needs_key:
@@ -383,7 +383,7 @@ class SettingsDialog(QDialog):
         self.offer_passwords = QCheckBox("Offer to save passwords when I sign in")
         self.offer_passwords.setChecked(self.store.get("save_passwords") is not False)
         v.addWidget(self.offer_passwords)
-        v.addWidget(self._note("Saved passwords are encrypted with your Windows account, kept separately for each "
+        v.addWidget(self._note(f"Saved passwords are encrypted with {secretbox.where()}, kept separately for each "
                                "profile, never saved from private windows and never shown to the AI."))
         if self.win is not None and hasattr(self.win, "show_passwords"):
             def google():
@@ -507,11 +507,14 @@ class SettingsDialog(QDialog):
                         c["base_url"] = url or c.get("base_url", "")
         self.store.set("overrides", ov)
         self.store.set("custom", custom)
-        for pid, key in self.pending_keys.items():
-            self.store.set_key(pid, key)
-        for pid in self.removed_keys:
-            if pid not in self.pending_keys:
-                self.store.set_key(pid, "")
+        try:
+            for pid, key in self.pending_keys.items():
+                self.store.set_key(pid, key)
+            for pid in self.removed_keys:
+                if pid not in self.pending_keys:
+                    self.store.set_key(pid, "")
+        except secretbox.KeyringMissing as e:   # Linux without a usable keyring: say so rather than save in the clear
+            QMessageBox.warning(self, "API keys not saved", str(e))
         self.store.set("save_passwords", self.offer_passwords.isChecked())
         self.store.set("autofill", self.offer_autofill.isChecked())
         self.store.set("safe_browsing", self.safe_browsing.isChecked())

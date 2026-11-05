@@ -10,6 +10,14 @@ python -m venv .venv
 .venv\Scripts\python -m atlasbrowser
 ```
 
+On Linux (Python 3.10+, with the `python3-venv` package on Debian/Ubuntu):
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+./run.sh
+```
+
 The source package retains its historical name, atlasbrowser. The public application is Pelagic. API keys belong in the app's encrypted settings or the documented environment variables, never in source files.
 
 ## Organization
@@ -18,8 +26,8 @@ The source package retains its historical name, atlasbrowser. The public applica
 | --- | --- |
 | atlasbrowser/ | Browser, AI providers/agent, UI and application assets |
 | tests/ | Standalone regression scripts; each script documents its purpose |
-| launcher/ | Windows launcher source and resource definitions |
-| packaging/ | PyInstaller specifications, Inno Setup scripts and version metadata |
+| launcher/ | Windows launcher source and resource definitions (Linux uses run.sh or the packaged ./Pelagic) |
+| packaging/ | PyInstaller specifications, Inno Setup scripts, version metadata, and the Linux build (build_linux.sh, linux/) |
 | playground/ | Standalone AI playground page |
 | website/ | Static installer download website |
 
@@ -43,6 +51,18 @@ powershell -File packaging/build.ps1
 ```
 
 The build script uses a packaging virtual environment with access to installed system packages, installs PyInstaller and yt-dlp, downloads FFmpeg, and builds dist/Pelagic. Install Inno Setup 6 to produce the installer and updater as well. This build has network dependencies and is not a pinned reproducible build.
+
+## Build for Linux
+
+On an x86_64 Linux machine (build on the oldest distribution you want to support, because the bundle uses that system's glibc):
+
+```sh
+sh packaging/build_linux.sh
+```
+
+It makes a packaging virtual environment (`packaging/.venv-linux`), installs the requirements, PyInstaller and yt-dlp, builds dist/Pelagic with `packaging/pelagic.spec`, and packs `dist/Pelagic-<version>-linux-x86_64.tar.gz` with `packaging/linux/install.sh` and `pelagic.desktop`. FFmpeg is not bundled on Linux; Pelagic uses the system's `ffmpeg`.
+
+Linux-specific behaviour: data is in `$XDG_DATA_HOME/AtlasBrowser` (normally `~/.local/share/AtlasBrowser`; an existing `~/AtlasBrowser` is still used). Secrets use `atlasbrowser/secretbox.py`: a random key in the system keyring through the `keyring` package, or with `PELAGIC_PASSWORD_STORE=basic` a mode-600 key file. Tests set `PELAGIC_PASSWORD_STORE=basic` so they never touch your keyring; `python tests/secretbox_test.py` checks this on any system.
 
 Publish generated installers as GitHub release assets. The current full installer is:
 

@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if "--visible" not in sys.argv:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ["ATLASBROWSER_HOME"] = tempfile.mkdtemp(prefix="atlas_darkmode_test_")
+os.environ.setdefault("PELAGIC_PASSWORD_STORE", "basic")   # off Windows: a key file in that folder, not your keyring
 os.environ.pop("PELAGIC_DARKMODE_SCRIPT", None)
 
 from PySide6.QtCore import QEventLoop, QTimer, QUrl  # noqa: E402
