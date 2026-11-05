@@ -18,6 +18,14 @@ python3 -m venv .venv
 ./run.sh
 ```
 
+Qt WebEngine needs some system libraries that desktop installs usually have but minimal installs (servers, containers, WSL) may lack. Without `libxcb-cursor0` Pelagic stops with *Could not load the Qt platform plugin "xcb"*. On Debian/Ubuntu:
+
+```sh
+sudo apt install libegl1 libgl1 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libnss3 libxcomposite1 libxdamage1 libxrandr2 libxtst6 libasound2t64 libgbm1
+```
+
+Before Ubuntu 24.04, use `libasound2` instead of `libasound2t64`. Saved passwords, cards and API keys need a running keyring (gnome-keyring or KWallet), or `PELAGIC_PASSWORD_STORE=basic`. `ffmpeg` is optional (HD and MP3 YouTube downloads).
+
 The source package retains its historical name, atlasbrowser. The public application is Pelagic. API keys belong in the app's encrypted settings or the documented environment variables, never in source files.
 
 ## Organization
@@ -60,7 +68,7 @@ On an x86_64 Linux machine (build on the oldest distribution you want to support
 sh packaging/build_linux.sh
 ```
 
-It makes a packaging virtual environment (`packaging/.venv-linux`), installs the requirements, PyInstaller and yt-dlp, builds dist/Pelagic with `packaging/pelagic.spec`, and packs `dist/Pelagic-<version>-linux-x86_64.tar.gz` with `packaging/linux/install.sh` and `pelagic.desktop`. FFmpeg is not bundled on Linux; Pelagic uses the system's `ffmpeg`.
+It makes a packaging virtual environment (`packaging/.venv-linux`), installs the requirements, PyInstaller and yt-dlp, builds dist/Pelagic with `packaging/pelagic.spec`, and packs `dist/Pelagic-<version>-linux-x86_64.tar.gz` with `packaging/linux/install.sh` and `pelagic.desktop`. FFmpeg is not bundled on Linux; Pelagic uses the system's `ffmpeg`. The release tarball is built on Ubuntu 24.04 (glibc 2.39) and needs a distribution at least that new; older distributions should build from source with this script. The build machine needs the same system libraries as running from source (above).
 
 Linux-specific behaviour: data is in `$XDG_DATA_HOME/AtlasBrowser` (normally `~/.local/share/AtlasBrowser`; an existing `~/AtlasBrowser` is still used). Secrets use `atlasbrowser/secretbox.py`: a random key in the system keyring through the `keyring` package, or with `PELAGIC_PASSWORD_STORE=basic` a mode-600 key file. Tests set `PELAGIC_PASSWORD_STORE=basic` so they never touch your keyring; `python tests/secretbox_test.py` checks this on any system.
 
