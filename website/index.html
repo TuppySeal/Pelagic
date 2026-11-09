@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Download Pelagic</title>
-<meta name="description" content="Pelagic is a Windows web browser with a built-in AI assistant. Free download for Windows 10 and 11.">
+<meta name="description" content="Pelagic is a web browser with a built-in AI assistant. Free download for Windows and Linux, open source on GitHub.">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +31,16 @@ a{color:var(--surface)}
 .bar .wrap{display:flex;align-items:center;gap:16px;height:58px}
 .brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:20px}
 .brand img{width:30px;height:30px}
-.bar .btn{margin-left:auto;padding:8px 16px;font-size:15px}
+.bar .btn{padding:8px 16px;font-size:15px}
+.ghlink{margin-left:auto;display:inline-flex;align-items:center;gap:8px;color:var(--text-soft);text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:15px}
+.ghlink:hover{color:var(--text)}
+.ghlink svg{width:20px;height:20px}
+.btn.alt{background:transparent;color:var(--abyss);box-shadow:inset 0 0 0 2px var(--abyss)}
+.btn.alt:hover{background:rgba(4,22,43,.08)}
+.src{font-family:var(--f-display);font-weight:600;font-size:16px;color:var(--abyss);display:inline-flex;align-items:center;gap:8px;margin-top:6px}
+.src svg{width:18px;height:18px}
+.oslabel{font-family:var(--f-mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--surface);margin:40px 0 14px}
+.oslabel:first-of-type{margin-top:0}
 
 .hero{background:linear-gradient(180deg,var(--sun) 0%,#BDEBE6 50%,#7CCFCB 100%);color:var(--ink)}
 .hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center;padding-block:72px 80px}
@@ -89,6 +98,12 @@ kbd{border:1px solid rgba(127,227,218,.3);border-bottom-width:2px;border-radius:
 .final .btn{background:var(--surface);color:var(--abyss)}
 .final .btn:hover{background:var(--glow)}
 .final .meta{color:var(--text-soft);margin-top:12px}
+.final .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.final .btn.alt{background:transparent;color:var(--surface);box-shadow:inset 0 0 0 2px var(--surface)}
+.final .btn.alt:hover{background:rgba(127,227,218,.1)}
+.final .src{color:var(--surface);margin-top:18px}
+footer a{color:var(--text-soft)}
+footer .links{display:flex;gap:18px;flex-wrap:wrap}
 footer{border-top:1px solid var(--line);color:var(--text-soft);font-size:14px}
 footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
@@ -101,7 +116,7 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
   .hero .wrap{padding-block:44px 56px;gap:32px}
   section{padding-block:56px}
   .feats,.steps,.specs{grid-template-columns:1fr}
-  .bar .btn span{display:none}
+  .bar .btn span,.ghlink span{display:none}
 }
 </style>
 </head>
@@ -109,12 +124,14 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="gh" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></symbol>
 </svg>
 
 <header class="bar">
   <div class="wrap">
     <a class="brand" href="#top"><img src="img/pelagic-icon.png" alt="">pelagic</a>
-    <a class="btn" data-download href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg><span>Download</span></a>
+    <a class="ghlink" data-repo href="https://github.com/TuppySeal/Pelagic"><svg><use href="#gh"/></svg><span>GitHub</span></a>
+    <a class="btn" id="topdl" data-download="windows" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg><span>Download</span></a>
   </div>
 </header>
 
@@ -122,12 +139,15 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
   <div class="hero">
     <div class="wrap">
       <div>
-        <div class="kicker">Version 1.0 · Windows</div>
+        <div class="kicker">Version 1.0 · Windows &amp; Linux · Open source</div>
         <h1>Pelagic</h1>
         <p>A full web browser with an AI assistant built in. Chat about the page you're on, or let the agent click and type through tasks for you.</p>
         <div class="dl">
-          <a class="btn big" data-download href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download Pelagic for Windows</a>
+          <a class="btn big" data-download="windows" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download for Windows</a>
           <div class="meta">PelagicSetup-1.0.0.0.exe · 181 MB · Windows 10 &amp; 11 (64-bit)</div>
+          <a class="btn alt" data-download="linux" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/Pelagic-1.0.0-linux-x86_64.tar.gz"><svg><use href="#dl"/></svg>Download for Linux</a>
+          <div class="meta">Pelagic-1.0.0-linux-x86_64.tar.gz · 251 MB · x86_64, Ubuntu 24.04 or newer</div>
+          <a class="src" data-repo href="https://github.com/TuppySeal/Pelagic"><svg><use href="#gh"/></svg>Source code on GitHub</a>
         </div>
       </div>
       <div class="frame"><div class="dots"><i></i><i></i><i></i></div><img src="img/pelagic-preview.png" width="1340" height="820" alt="Pelagic browser window with tabs and the AI panel open"></div>
@@ -161,17 +181,26 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
     <div class="wrap">
       <h2>Installing</h2>
       <p class="lede">Takes about a minute. No account needed.</p>
+      <div class="oslabel">Windows</div>
       <ol class="steps">
-        <li><b>Download</b><p>Click the download button and save <code>PelagicSetup-1.0.0.0.exe</code>.</p></li>
+        <li><b>Download</b><p>Click the Windows download button and save <code>PelagicSetup-1.0.0.0.exe</code>.</p></li>
         <li><b>Run the installer</b><p>If Windows shows "Windows protected your PC", click <b style="display:inline;font-size:inherit">More info</b> then <b style="display:inline;font-size:inherit">Run anyway</b>. This appears because the installer isn't code-signed yet.</p></li>
         <li><b>Open Pelagic</b><p>Find it in the Start menu or on your desktop. To use AI features, add an API key in Settings.</p></li>
+      </ol>
+
+      <div class="oslabel">Linux</div>
+      <ol class="steps">
+        <li><b>Download and unpack</b><p>Save <code>Pelagic-1.0.0-linux-x86_64.tar.gz</code>, then run <code>tar xzf Pelagic-1.0.0-linux-x86_64.tar.gz</code>.</p></li>
+        <li><b>Install</b><p>In the unpacked folder run <code>./install.sh</code>. It installs into <code>~/.local</code> without sudo. <code>./install.sh --remove</code> uninstalls.</p></li>
+        <li><b>Open Pelagic</b><p>Find it in your applications menu. Saved passwords and API keys are protected by your system keyring (GNOME Keyring, KWallet or KeePassXC).</p></li>
       </ol>
 
       <div class="specs">
         <div class="spec">
           <h3>Requirements</h3>
           <dl>
-            <dt>System</dt><dd>Windows 10 or 11, 64-bit</dd>
+            <dt>Windows</dt><dd>Windows 10 or 11, 64-bit</dd>
+            <dt>Linux</dt><dd>x86_64 with glibc 2.39+ (Ubuntu 24.04, Fedora 40 or newer). Older systems can <a data-repo href="https://github.com/TuppySeal/Pelagic">build from source</a></dd>
             <dt>Disk</dt><dd>About 500 MB free</dd>
             <dt>AI</dt><dd>Optional. Your own API key (Claude, OpenAI, Gemini) or a local model</dd>
           </dl>
@@ -179,11 +208,16 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
         <div class="spec">
           <h3>File details</h3>
           <dl>
-            <dt>File</dt><dd>PelagicSetup-1.0.0.0.exe</dd>
-            <dt>Size</dt><dd>189,332,917 bytes</dd>
+            <dt>Windows</dt><dd>PelagicSetup-1.0.0.0.exe · 189,354,876 bytes</dd>
           </dl>
-          <div style="margin-top:10px;font-size:15.5px;color:var(--text-soft)">SHA-256</div>
-          <div class="hash"><code id="sha">d1a23613caf641b5a8d47ae11e24871f2a538cc11a2e63829d406d3105bab15c</code><button class="copy" type="button" id="copy">Copy</button></div>
+          <div style="margin-top:6px;font-size:15.5px;color:var(--text-soft)">SHA-256</div>
+          <div class="hash"><code>ae278e3884f864c303949cee5c2bc8f9edc2ddc9f88d0da0b2d933f2ba3db66a</code><button class="copy" type="button">Copy</button></div>
+          <dl style="margin-top:14px">
+            <dt>Linux</dt><dd>Pelagic-1.0.0-linux-x86_64.tar.gz · 263,601,762 bytes</dd>
+          </dl>
+          <div style="margin-top:6px;font-size:15.5px;color:var(--text-soft)">SHA-256</div>
+          <div class="hash"><code>a7d6449c1663c859777e974bf42af39b5f0d3607d66c75d3a515ff3deb6ca7e7</code><button class="copy" type="button">Copy</button></div>
+          <div style="margin-top:12px;font-size:15.5px"><a data-releases href="https://github.com/TuppySeal/Pelagic/releases">All releases on GitHub</a></div>
         </div>
       </div>
     </div>
@@ -193,24 +227,43 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
     <div class="wrap">
       <img src="img/pelagic-icon.png" alt="">
       <h2>Ready to dive in?</h2>
-      <a class="btn big" data-download href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download Pelagic 1.0</a>
-      <div class="meta">Free · Windows 10 &amp; 11 · 181 MB</div>
+      <div class="row">
+        <a class="btn big" data-download="windows" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Windows</a>
+        <a class="btn big alt" data-download="linux" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/Pelagic-1.0.0-linux-x86_64.tar.gz"><svg><use href="#dl"/></svg>Linux</a>
+      </div>
+      <div class="meta">Free · Open source · Windows 10 &amp; 11 · Linux x86_64</div>
+      <a class="src" data-repo href="https://github.com/TuppySeal/Pelagic"><svg><use href="#gh"/></svg>TuppySeal/Pelagic on GitHub</a>
     </div>
   </section>
 </main>
 
-<footer><div class="wrap"><span>Pelagic · a student project · 2026</span><a href="#top">Back to top ↑</a></div></footer>
+<footer><div class="wrap"><span>Pelagic · a student project · 2026</span><span class="links"><a data-repo href="https://github.com/TuppySeal/Pelagic">GitHub</a><a data-releases href="https://github.com/TuppySeal/Pelagic/releases">Releases</a><a href="#top">Back to top ↑</a></span></div></footer>
 
 <script>
-// Where every download button points (the GitHub release). Change this one line for a new version.
-var DOWNLOAD_URL = "https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe";
+// Where the buttons point. For a new version, change these lines (and the file names, sizes and hashes above).
+var REPO_URL = "https://github.com/TuppySeal/Pelagic";
+var DOWNLOADS = {
+  windows: REPO_URL + "/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe",
+  linux:   REPO_URL + "/releases/download/v1.0.0.0/Pelagic-1.0.0-linux-x86_64.tar.gz"
+};
 
-document.querySelectorAll("[data-download]").forEach(function (a) { a.href = DOWNLOAD_URL; });
-document.getElementById("copy").addEventListener("click", function () {
-  var b = this, t = document.getElementById("sha").textContent;
-  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(
-    function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); },
-    function () { b.textContent = "Select it"; });
+document.querySelectorAll("[data-download]").forEach(function (a) { a.href = DOWNLOADS[a.getAttribute("data-download")]; });
+document.querySelectorAll("[data-repo]").forEach(function (a) { a.href = REPO_URL; });
+document.querySelectorAll("[data-releases]").forEach(function (a) { a.href = REPO_URL + "/releases"; });
+
+// Linux visitors get the Linux file from the top bar button.
+if (/Linux/.test(navigator.platform || navigator.userAgent) && !/Android/.test(navigator.userAgent)) {
+  var topBtn = document.getElementById("topdl");
+  topBtn.setAttribute("data-download", "linux"); topBtn.href = DOWNLOADS.linux;
+}
+
+document.querySelectorAll(".hash .copy").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var t = b.previousElementSibling.textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(
+      function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); },
+      function () { b.textContent = "Select it"; });
+  });
 });
 </script>
 </body>
