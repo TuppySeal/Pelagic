@@ -1,5 +1,7 @@
 # Pelagic
 
+**[Features](FEATURES.md)** · **[Changelog](CHANGELOG.md)** · **[Download](https://github.com/TuppySeal/Pelagic/releases)** · **[Website](https://pelagicbrowser.app)**
+
 Source and development instructions: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). Claude's repository workflow is in [CLAUDE.md](CLAUDE.md). Download the Windows installer from [Releases](https://github.com/TuppySeal/Pelagic/releases).
 
 
