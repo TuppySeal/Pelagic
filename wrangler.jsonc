@@ -1,0 +1,9 @@
+// Cloudflare Workers Builds deploys the download website from this repo.
+// Only the website/ folder is uploaded; nothing else in the repo is published.
+{
+  "name": "download",
+  "compatibility_date": "2026-11-09",
+  "assets": {
+    "directory": "./website"
+  }
+}
