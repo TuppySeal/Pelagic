@@ -37,7 +37,7 @@ The source package retains its historical name, atlasbrowser. The public applica
 | launcher/ | Windows launcher source and resource definitions (Linux uses run.sh or the packaged ./Pelagic) |
 | packaging/ | PyInstaller specifications, Inno Setup scripts, version metadata, and the Linux build (build_linux.sh, linux/) |
 | playground/ | Standalone AI playground page |
-| website/ | Static installer download website, deployed to the Cloudflare Worker `download` on every push to main (see wrangler.jsonc) |
+| website/ | Static installer download website, deployed to the Cloudflare Worker `download` (https://pelagicbrowser.app) on every push to main (see wrangler.jsonc) |
 
 The existing feature guide is README.md. Legacy Wayfinder-named launcher/build definitions remain for compatibility. Generated binaries, environments and personal app data are excluded.
 
