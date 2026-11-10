@@ -18,6 +18,14 @@ Removed (features taken out), Security (anything that affects safety or privacy)
 ## [Unreleased]
 
 ### Added
+- **Blocked domains (like Pi-hole)**: Settings → Privacy → *Edit blocked domains…*, or the puzzle menu → *Block
+  example.com everywhere…*. Blocks whole domains and their subdomains as pages and inside other pages, with your own
+  list, downloadable hosts-file or domain blocklists (StevenBlack, OISD, Hagezi), a *Never block* list, and a
+  *This site is blocked* page with *Unblock*. Works in private windows and whether or not the ad blocker is on.
+- **Proxy and VPN connection**: Settings → *Connection* sends Pelagic's browsing through a SOCKS5, SOCKS4, HTTP or
+  HTTPS proxy (such as a VPN service's proxy or Tor) or a PAC address, with a bypass list, *Test proxy*, proxy
+  sign-in for HTTP proxies, and WebRTC kept from going around the proxy. The default still follows the computer's
+  settings and any VPN app. Takes effect after a restart.
 
 ### Changed
 

@@ -56,9 +56,12 @@ class Browser:
         elif mine and mine.get("version") != parse_meta(code).get("version", ""):
             self.extensions.install(code, source_url=DARKMODE_SOURCE)
         lists = shared_lists((store.shared or store).root / "adblock")
-        self.blocker = Blocker(lists, store, app)
+        from . import blocklist   # blocked domains (Pi-hole style): one per profile, private windows included
+        self.domains = blocklist.DomainBlocker(store, blocklist.shared_lists((store.shared or store).root / "blocklists"))
+        self.profile._domains = self.private_profile._domains = self.domains
+        self.blocker = Blocker(lists, store, app, domains=self.domains)
         self.profile.setUrlRequestInterceptor(self.blocker)
-        self.private_blocker = Blocker(lists, store, app)
+        self.private_blocker = Blocker(lists, store, app, domains=self.domains)
         self.private_profile.setUrlRequestInterceptor(self.private_blocker)
         self._watches_loaded = False
         self._background: list = []
@@ -66,6 +69,11 @@ class Browser:
             p.downloadRequested.connect(self.on_download)
         from . import spellcheck
         spellcheck.apply(store, [self.profile, self.private_profile])
+        from . import proxy
+        if proxy.uses_proxy(proxy.config(store)) and proxy.config(store).get("webrtc_private", True):
+            from PySide6.QtWebEngineCore import QWebEngineSettings
+            for p in (self.profile, self.private_profile):   # WebRTC shows only the proxy's side, not local addresses
+                p.settings().setAttribute(QWebEngineSettings.WebAttribute.WebRTCPublicInterfacesOnly, True)
         # folder sync (sync.py): soon after start, then every few minutes, and when the last window closes
         self.sync = FolderSync(store, pid, Collections(store, self.passwords.store, self.passwords.autofill.store))
         self._sync_job = None
@@ -205,6 +213,8 @@ def main(argv: list[str] | None = None) -> int:
     store = Store()
     from . import spellcheck
     spellcheck.prepare_environment()   # before the browser engine starts
+    from . import proxy
+    proxy.apply_environment(store)     # proxy / VPN connection (Settings → Connection), also before the engine
     hub = ProfileHub(app, store, Browser)
 
     server = QLocalServer()

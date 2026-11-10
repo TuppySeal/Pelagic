@@ -17,7 +17,7 @@ from .store import SEARCH_ENGINES
 
 
 class SettingsDialog(QDialog):
-    TABS = ("general", "homepage", "profiles", "passwords", "privacy", "sync", "ai", "agent")
+    TABS = ("general", "homepage", "profiles", "passwords", "privacy", "connection", "sync", "ai", "agent")
 
     def __init__(self, store, parent=None, win=None, start: str = "general"):
         super().__init__(parent)
@@ -40,6 +40,9 @@ class SettingsDialog(QDialog):
         tabs.addTab(self._profiles_tab(), "Profiles")
         tabs.addTab(self._passwords_tab(), "Passwords")
         tabs.addTab(self._privacy_tab(), "Privacy")
+        from .network_ui import ConnectionPage
+        self.connection = ConnectionPage(store)
+        tabs.addTab(self.connection, "Connection")
         ctx = getattr(self.win, "ctx", None)
         if ctx is not None and hasattr(ctx, "sync") and not getattr(self.win, "private", False):
             from .sync_ui import SyncPage
@@ -437,6 +440,15 @@ class SettingsDialog(QDialog):
                 QMessageBox.information(self, "Cache", "Cached images and files were cleared.")
         v.addLayout(self._button_row(("Clear history…", clear_history), ("Clear cookies and sign-ins…", clear_cookies),
                                      ("Clear cached files", clear_cache)))
+        v.addSpacing(8)
+        v.addWidget(QLabel("<b>Blocked domains</b>"))
+        v.addWidget(self._note("Like Pi-hole: block whole domains (ads, trackers, distracting sites) in pages and in "
+                               "everything pages load. Add your own or download blocklists."))
+
+        def edit_blocklist():
+            from .network_ui import BlocklistDialog
+            BlocklistDialog(self.store, getattr(getattr(self.win, "ctx", None), "domains", None), self).exec()
+        v.addLayout(self._button_row(("Edit blocked domains…", edit_blocklist)))
         v.addStretch(1)
         return w
 
@@ -474,6 +486,10 @@ class SettingsDialog(QDialog):
         return w
 
     def _accept(self):
+        bad = self.connection.problem()
+        if bad:
+            QMessageBox.warning(self, "Connection", bad)
+            return
         if self.custom_price.isChecked():
             try:
                 values = [float(self.price_input.text()), float(self.price_output.text())]
@@ -528,6 +544,8 @@ class SettingsDialog(QDialog):
         self.store.set("spellcheck_lang", self.spell_lang.currentData())
         self.store.set("home", self.home.text().strip() or "atlas:start")
         self.homepage.save()
+        if self.connection.save():
+            QMessageBox.information(self, "Connection", "The new proxy setting takes effect when you restart Pelagic.")
         self.store.set("memory_file", self.memory_path.text().strip())
         self.store.set("max_steps", self.steps.value())
         self.store.set("guard", self.guard.isChecked())

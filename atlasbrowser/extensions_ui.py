@@ -91,6 +91,12 @@ class ExtensionsButton(QToolButton):
                 a.toggled.connect(lambda checked, h=host: self._toggle_dark(h, checked))
             self._commands_section(m, tab)
         m.addSeparator()
+        domains = getattr(ctx, "domains", None)
+        if host and domains is not None:
+            m.addAction(f"Block {_base_domain(host)} everywhere…").triggered.connect(
+                lambda _=False, h=_base_domain(host): self._block_domain(h))
+        if domains is not None:
+            m.addAction("Blocked domains…").triggered.connect(self._edit_blocklist)
         if host:
             m.addAction(f"Find scripts for {_base_domain(host)}…").triggered.connect(
                 lambda: win.open_tab(f"https://greasyfork.org/en/scripts/by-site/{_base_domain(host)}"))
@@ -120,6 +126,17 @@ class ExtensionsButton(QToolButton):
         self.win.ctx.blocker.set_paused(host, not on)
         self.win.ctx.blocker.reset(host)
         self.win._cur(lambda t: t.reload())
+
+    def _block_domain(self, domain):
+        if QMessageBox.question(self.win, "Block domain", f"Block {domain} and all its subdomains? Pages from it won't "
+                                "open, and other sites can't load anything from it.") != QMessageBox.Yes:
+            return
+        if self.win.ctx.domains.add(domain):
+            self.win._cur(lambda t: t.reload())
+
+    def _edit_blocklist(self):
+        from .network_ui import BlocklistDialog
+        BlocklistDialog(self.win.store, self.win.ctx.domains, self.win).exec()
 
     def _toggle_dark(self, host, on):
         darkmode.set_site_off(self.win.store, host, not on)

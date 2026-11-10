@@ -77,7 +77,7 @@ from .secretbox import KeyringMissing, _dpapi, protect, unprotect  # noqa: E402,
 # AI provider and agent settings shared by every profile (they live in the first profile's settings.json).
 SHARED_SETTINGS = {"selected", "overrides", "custom", "multi", "model_cache", "price_overrides", "max_steps", "vision",
                    "vision_every_step", "humanize", "batch", "token_saver", "guard", "confirm_all", "context_limit",
-                   "core_instructions"}
+                   "core_instructions", "proxy"}   # proxy: the browser engine has one proxy for every profile
 
 
 class Store:
@@ -109,6 +109,10 @@ class Store:
         "guard": True,
         "adblock": True,         # built-in ad and tracker blocker
         "adblock_allow": [],     # sites the blocker is paused on
+        "domain_block": True,    # blocked domains, Pi-hole style (blocklist.py)
+        "blocked_domains": [],   # domains the user blocked; subdomains are blocked too
+        "allowed_domains": [],   # never blocked, even when a downloaded list has them
+        "blocklist_urls": [],    # hosts-format / domain lists to download
         "save_passwords": True,  # offer to save passwords after sign-in (never in private windows)
         "autofill": True,        # offer to save and fill addresses and payment cards
         "safe_browsing": True,   # warn before known phishing / malware sites (local lists, see safebrowsing.py)

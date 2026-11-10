@@ -94,6 +94,9 @@ def page_url(tab) -> QUrl:
     blocked = getattr(tab, "_unsafe_target", "")
     if blocked and url.isLocalFile() and url.fileName().startswith("unsafe-"):
         return QUrl(blocked)    # an unsafe-site warning stands for the address it stopped
+    blocked = getattr(tab, "_blocked_target", "")
+    if blocked and url.isLocalFile() and url.fileName().startswith("blocked-"):
+        return QUrl(blocked)    # so does the "This site is blocked" page (blocked domains)
     return url
 
 

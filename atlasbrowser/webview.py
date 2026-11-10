@@ -60,8 +60,15 @@ class WebPage(QWebEnginePage):
         if hasattr(self, "desktopMediaRequested"):    # screen sharing (getDisplayMedia), Qt 6.7+
             self.desktopMediaRequested.connect(self._on_desktop_media)
         self.loadFinished.connect(self._darkmode_migrate)
+        self.proxyAuthenticationRequired.connect(self._on_proxy_auth)
         from . import darkmode
         darkmode.track(self)   # reloaded when dark mode is switched on or off
+
+    def _on_proxy_auth(self, url, auth, proxy_host):
+        store = getattr(self.tab.window(), "store", None)
+        if store is not None:
+            from . import proxy
+            proxy.answer_auth(self, url, auth, proxy_host, store, self.tab.window())
 
     def _darkmode_migrate(self, ok):
         win = self.tab.window()
@@ -101,6 +108,18 @@ class WebPage(QWebEnginePage):
                     return False
             if fileview.wants(url):
                 QTimer.singleShot(0, lambda: fileview.show(self.tab, url, store))
+                return False
+        if is_main_frame:   # blocked domains (blocklist.py): the "This site is blocked" page and its two links
+            from . import blocklist
+            domains = getattr(self.profile(), "_domains", None)
+            if domains is not None and blocklist.is_blocked_page(self.url()):
+                act = blocklist.parse_action(url)
+                if act:
+                    QTimer.singleShot(0, lambda: blocklist.handle_action(self.tab, act, domains))
+                    return False
+            hit = domains.match(url.host()) if domains is not None and url.scheme() in ("http", "https") else None
+            if hit:
+                QTimer.singleShot(0, lambda: blocklist.show_blocked(self.tab, url, hit, domains.store))
                 return False
         if is_main_frame:   # dark mode for websites: on or off for the page about to open (darkmode.py)
             from . import darkmode

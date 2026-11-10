@@ -295,9 +295,10 @@ def shared_lists(folder: Path) -> FilterLists:
 class Blocker(QWebEngineUrlRequestInterceptor):
     """Per-profile request interceptor. Main-frame navigations are never blocked, so sites always open."""
 
-    def __init__(self, lists: FilterLists, store, parent=None):
+    def __init__(self, lists: FilterLists, store, parent=None, domains=None):
         super().__init__(parent)
         self.lists, self.store = lists, store
+        self.domains = domains               # blocklist.DomainBlocker: the user's blocked domains (Pi-hole style)
         self.counts: dict[str, int] = {}     # page host -> requests blocked since it was last loaded
 
     def enabled(self) -> bool:
@@ -308,16 +309,21 @@ class Blocker(QWebEngineUrlRequestInterceptor):
         return any(h in allow for h in _host_parents(host.lower())) if host else False
 
     def interceptRequest(self, info):
+        url = info.requestUrl()
+        if url.scheme() not in ("http", "https", "ws", "wss"):
+            return
+        page = info.firstPartyUrl().host()
+        # blocked domains apply to everything, pages included, whether or not the ad blocker is on
+        if self.domains is not None and self.domains.match(url.host()):
+            info.block(True)
+            self.counts[page] = self.counts.get(page, 0) + 1
+            return
         engine = self.lists.engine
         if engine is None or not self.enabled():
             return
         rtype = info.resourceType()
         if rtype == _RT.ResourceTypeMainFrame:
             return
-        url = info.requestUrl()
-        if url.scheme() not in ("http", "https", "ws", "wss"):
-            return
-        page = info.firstPartyUrl().host()
         if self.paused_on(page):
             return
         if engine.should_block(url.toString(), url.host(), rtype, page):

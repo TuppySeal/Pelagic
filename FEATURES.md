@@ -45,6 +45,8 @@ Linux. This page is the quick list; the [README](README.md) explains how to use 
 
 ## Extensions, ad blocking and dark mode
 - **Ad and tracker blocker** (EasyList and EasyPrivacy), with a blocked count and per-site pause.
+- **Blocked domains, like Pi-hole**: block whole domains and their subdomains everywhere, with your own list,
+  downloadable blocklists (hosts files and domain lists) and a never-block list.
 - **Userscripts** from Greasy Fork and OpenUserJS, plus your own styles and scripts for chosen sites.
 - **Extension gallery** of Pelagic's own extensions, installed with one click.
 - **Dark mode for websites**, built in: darkens light sites, leaves dark ones alone, and can be turned off per site.
@@ -55,6 +57,8 @@ Linux. This page is the quick list; the [README](README.md) explains how to use 
 - **Password checkup** for breached, reused and weak passwords (only part of a hash is ever sent).
 - **Address and card autofill**; the card security code is never saved.
 - Everything is encrypted with your Windows account, or with a key in the system keyring on Linux.
+- **Proxy and VPN**: send browsing through a SOCKS5, HTTP or HTTPS proxy (a VPN service's proxy or Tor) or a PAC
+  address, with WebRTC leak protection; or follow the computer's settings and VPN app.
 - **Unsafe-site warnings** for known phishing and malware, checked on your computer.
 - **Site permissions** page for camera, microphone, location, notifications and more.
 - Clear browsing data (Ctrl+Shift+Del) and safe handling of self-signed certificates on local devices.

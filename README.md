@@ -94,6 +94,12 @@ playlist) as .mp4 video or audio, with progress and Cancel. It uses yt-dlp; HD v
 ## Unsafe-site warnings
 Before opening a known phishing or malware address, Pelagic shows a red warning page (*Back to safety*, or *Details* → visit anyway for this session), and blocks downloads from listed sites. The lists (Phishing Army, OpenPhish, URLhaus) refresh every few hours and are checked on your computer; the sites you visit aren't sent anywhere. Google Safe Browsing itself needs a Google API key, so coverage is close to, not the same as, Chrome's. Settings → Privacy to turn it off.
 
+## Blocked domains (like Pi-hole)
+Settings → Privacy → **Edit blocked domains…** (or the puzzle menu → *Block example.com everywhere…*). Blocked domains and all their subdomains never load: not as pages (you get a *This site is blocked* page with *Unblock*) and not as images, scripts or frames inside other sites. Type your own domains (plain names, `*.example.com`, `||example.com^` or hosts-file lines like `0.0.0.0 example.com`), add downloadable blocklists such as StevenBlack's hosts file, OISD or Hagezi (refreshed every few days), and keep a *Never block* list. Per profile, works in private windows, and is separate from the ad blocker, so it still applies when the ad blocker is off or paused.
+
+## Proxy and VPN
+Settings → **Connection**. *Use the computer's settings* (the default) follows the system proxy settings and any VPN app you run (WireGuard, OpenVPN or your VPN service's app), which already covers everything Pelagic does. To send only Pelagic through a VPN or proxy, choose *Use this proxy server* and enter a SOCKS5, SOCKS4, HTTP or HTTPS proxy: many VPN services (Mullvad, NordVPN, Proton VPN, Private Internet Access, Windscribe) offer one, and Tor is SOCKS5 `127.0.0.1` port `9050`. A PAC address and *No proxy* are also available. *Test proxy* checks that the server answers. With SOCKS5, website names are looked up through the proxy too. WebRTC (video calls) is kept from going around the proxy. HTTP and HTTPS proxies can ask for a user name and password (saved encrypted, or asked for on first use); the browser engine can't sign in to SOCKS5 proxies. The setting is shared by all profiles and takes effect after a restart. With an HTTP proxy Pelagic's own requests (AI providers, list downloads) use it too; with SOCKS they connect directly.
+
 ## Sync
 Settings → **Sync** → *Choose folder…*: pick a folder that OneDrive, Google Drive or Dropbox keeps in sync, then the same folder in Pelagic on your other computer. Bookmarks, the reading list and history (90 days) sync, including edits and deletions. Tick *Also sync passwords, addresses and cards* and enter the same sync passphrase on each computer to sync those too, encrypted with the passphrase (it never leaves the computer). Sync runs at start, every 5 minutes, when the last window closes, and with *Sync now*.
 
@@ -118,6 +124,8 @@ For devices with self-signed certificates (for example, `https://10.0.255.1`), P
 `python tests/profiles_test.py` checks per-profile data, shared keys and settings, switching and deleting.
 
 `python tests/passwords_test.py` checks the encrypted store, save/update prompts, autofill, private-window and agent rules, and the Google import.
+
+`python tests/network_test.py` checks the proxy setting (through a local test proxy), blocked domains in pages, page parts and private windows, downloaded blocklists, the blocked page and its Unblock link.
 
 `python tests/chrome_parity_test.py` checks downloads, site permissions, printing, spell check, address and card autofill, the password checkup, unsafe-site warnings and the Sync tab.
 
