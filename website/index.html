@@ -49,7 +49,40 @@ a{color:var(--surface)}
 .hero{background:linear-gradient(180deg,var(--sun) 0%,#BDEBE6 50%,#7CCFCB 100%);color:var(--ink)}
 .hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center;padding-block:72px 80px}
 .kicker{font-family:var(--f-mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);font-weight:500}
-h1{font-family:var(--f-display);font-weight:800;font-size:clamp(48px,8vw,92px);line-height:.95;letter-spacing:-.04em;margin:12px 0 16px;color:var(--abyss)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,6vw,68px);line-height:1;letter-spacing:-.035em;margin:12px 0 16px;color:var(--abyss);text-wrap:balance}
+.opt{display:grid;gap:10px;justify-items:start}
+.osnote{margin-top:6px;padding:12px 16px;border-radius:12px;background:rgba(4,22,43,.08);color:var(--ink);font-size:16px;max-width:44ch}
+.osnote[hidden]{display:none}
+/* "Almost there" panel shown after a download click */
+.after{border:1px solid var(--line);border-radius:18px;background:var(--abyss);color:var(--text);padding:0;width:min(560px,calc(100% - 32px));max-height:calc(100% - 32px);box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}
+.after::backdrop{background:rgba(2,10,20,.7);backdrop-filter:blur(3px)}
+.after .in{padding:28px}
+.after h2{font-size:30px;margin:0 0 6px}
+.after .sub{margin:0 0 20px;color:var(--text-soft)}
+.after ol{margin:0 0 20px;padding-left:22px;display:grid;gap:10px}
+.after li::marker{color:var(--surface);font-family:var(--f-display);font-weight:700}
+.after .x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--text-soft);font-size:20px;line-height:1;cursor:pointer}
+.after .x:hover{color:var(--text);background:rgba(127,227,218,.1)}
+.after .retry{font-size:15px;color:var(--text-soft)}
+.after .ok{margin-top:18px;background:var(--surface);color:var(--abyss)}
+.after .ok:hover{background:var(--glow)}
+/* Drawing of the Windows "protected your PC" screen, so people recognise it */
+.ss{background:#0F5FA8;color:#fff;border-radius:10px;padding:18px 18px 14px;margin:4px 0 6px;font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.45}
+.ss .t{font-size:19px;font-weight:600;margin-bottom:6px}
+.ss .m{display:inline-block;text-decoration:underline;padding:2px 6px;margin:4px 0 10px -6px;border:2.5px solid #FFD54A;border-radius:999px}
+.ss .row{display:flex;justify-content:flex-end;gap:8px}
+.ss .row span{border:1px solid rgba(255,255,255,.7);padding:4px 14px;font-size:12.5px}
+.ss .row .run{border:2.5px solid #FFD54A;border-radius:4px;font-weight:600}
+.ss-cap{font-size:14px;color:var(--text-soft);margin:0}
+/* Privacy and FAQ */
+.priv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.faq{display:grid;gap:10px;max-width:820px}
+.faq details{border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.faq summary{cursor:pointer;padding:18px 22px;font-family:var(--f-display);font-weight:600;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--surface);font-size:22px;line-height:1}
+.faq details[open] summary::after{content:"\2212"}
+.faq details p{margin:0;padding:0 22px 18px;color:var(--text-soft)}
 .hero p{margin:0;font-size:19px;color:var(--ink-soft);max-width:44ch}
 .dl{margin-top:28px;display:grid;gap:10px;justify-items:start}
 .btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:600;font-size:17px;padding:14px 24px;border-radius:12px;text-decoration:none;background:var(--abyss);color:var(--glow);border:0;cursor:pointer;transition:transform .15s ease,background .15s}
@@ -114,6 +147,7 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
 @media (max-width:900px){
   .hero .wrap,.gallery{grid-template-columns:1fr}
   .feats,.steps{grid-template-columns:1fr 1fr}
+ .priv{grid-template-columns:1fr}
 }
 @media (max-width:600px){
   body{font-size:16px}
@@ -143,14 +177,19 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
   <div class="hero">
     <div class="wrap">
       <div>
-        <div class="kicker">Version 1.0 · Windows &amp; Linux · Open source</div>
-        <h1>Pelagic</h1>
-        <p>A full web browser with an AI assistant built in. Chat about the page you're on, or let the agent click and type through tasks for you.</p>
-        <div class="dl">
-          <a class="btn big" data-download="windows" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download for Windows</a>
-          <div class="meta">PelagicSetup-1.0.0.0.exe · 181 MB · Windows 10 &amp; 11 (64-bit)</div>
-          <a class="btn alt" data-download="linux" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/Pelagic-1.0.0-linux-x86_64.tar.gz"><svg><use href="#dl"/></svg>Download for Linux</a>
-          <div class="meta">Pelagic-1.0.0-linux-x86_64.tar.gz · 251 MB · x86_64, Ubuntu 24.04 or newer</div>
+        <div class="kicker">Pelagic 1.0 · Windows &amp; Linux · Free and open source</div>
+        <h1>The browser that does the clicking for you.</h1>
+        <p>Pelagic is a full web browser with an AI assistant built in. Ask about the page you're on, or describe a task and watch the agent click and type through it.</p>
+        <div class="dl" id="herodl">
+          <p class="osnote" id="osnote" hidden>Pelagic is only on Windows and Linux for now. Open this page on one of those to download it.</p>
+          <div class="opt" id="opt-windows">
+            <a class="btn big" data-download="windows" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe"><svg><use href="#dl"/></svg>Download for Windows</a>
+            <div class="meta">PelagicSetup-1.0.0.0.exe · 181 MB · Windows 10 &amp; 11 (64-bit)</div>
+          </div>
+          <div class="opt" id="opt-linux">
+            <a class="btn alt" data-download="linux" href="https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/Pelagic-1.0.0-linux-x86_64.tar.gz"><svg><use href="#dl"/></svg>Download for Linux</a>
+            <div class="meta">Pelagic-1.0.0-linux-x86_64.tar.gz · 251 MB · x86_64, Ubuntu 24.04 or newer</div>
+          </div>
           <a class="src" data-repo href="https://github.com/TuppySeal/Pelagic"><svg><use href="#gh"/></svg>Source code on GitHub</a>
         </div>
       </div>
@@ -227,6 +266,35 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
     </div>
   </section>
 
+  <section id="privacy">
+    <div class="wrap">
+      <h2>Your data stays yours</h2>
+      <p class="lede">An AI browser should be clear about what it sees and where things go. Here is the short version.</p>
+      <div class="priv">
+        <div class="feat"><h3>Kept on your computer</h3><p>Bookmarks, history, saved passwords and API keys are stored only on your computer, encrypted with your Windows account or your Linux keyring. There's no Pelagic account to sign up for.</p></div>
+        <div class="feat"><h3>Sent only when you use AI</h3><p>When you chat or run the agent, the page text and your message go straight to the AI provider you picked, using your own key. With a local model (Ollama or LM Studio) nothing leaves your computer. Passwords are never shown to the AI.</p></div>
+        <div class="feat"><h3>No tracking</h3><p>Pelagic has no analytics and no Pelagic server. Besides the sites you visit, it only downloads ad-block and unsafe-site lists, fetches search suggestions from your search engine, and checks for leaked passwords using just the first 5 characters of a scrambled copy.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" style="padding-top:0">
+    <div class="wrap">
+      <h2>Questions</h2>
+      <p class="lede">The things people usually ask first.</p>
+      <div class="faq">
+        <details><summary>Is Pelagic free?</summary><p>Yes. Pelagic is free and open source, and the code is on GitHub. There are no ads, accounts or subscriptions.</p></details>
+        <details><summary>Do I have to pay for the AI features?</summary><p>Not necessarily. You can run a local model with Ollama or LM Studio for free, or use a provider's free tier if it has one. If you use a paid API key, you pay that provider directly for what you use, and Pelagic shows you the running cost. Pelagic itself never charges anything. The browser works fine with no AI set up at all.</p></details>
+        <details><summary>Which AI providers work?</summary><p>Claude, OpenAI and Gemini, plus many others such as OpenRouter, Perplexity, Cohere, GitHub Models and Hugging Face, and local models through Ollama or LM Studio. Add a key in Settings to get started.</p></details>
+        <details><summary>Why does Windows say "Windows protected your PC"?</summary><p>The installer isn't code-signed yet. Signing costs money, and Windows warns about any new app it hasn't seen many people install. Click <b>More info</b>, then <b>Run anyway</b>. If you want to be sure the file is genuine, compare its SHA-256 checksum with the one in File details above.</p></details>
+        <details><summary>What can the agent do, and can it go wrong?</summary><p>It can open pages, click, scroll and fill in forms to finish a task you describe, and you watch it happen in the tab. It won't type passwords or card numbers; when a login or payment is needed it hands control back to you. You can stop it at any time.</p></details>
+        <details><summary>Can I bring my Chrome or Firefox extensions?</summary><p>Pelagic runs userscripts (the kind made for Tampermonkey or Greasy Fork) rather than Chrome or Firefox extensions, and it comes with a small gallery of ready-made ones.</p></details>
+        <details><summary>How do I uninstall it?</summary><p>On Windows, go to Settings, Apps, find Pelagic and click Uninstall. On Linux, run <code>./install.sh --remove</code> from the folder you unpacked.</p></details>
+        <details><summary>Who makes Pelagic?</summary><p>Pelagic is a student project. Found a bug or have an idea? Open an issue on <a data-issues href="https://github.com/TuppySeal/Pelagic/issues">GitHub</a>.</p></details>
+      </div>
+    </div>
+  </section>
+
   <section class="final">
     <div class="wrap">
       <img src="img/pelagic-icon.png" alt="">
@@ -241,7 +309,39 @@ footer .wrap{padding-block:24px 32px;display:flex;justify-content:space-between;
   </section>
 </main>
 
-<footer><div class="wrap"><span>Pelagic · a student project · 2026</span><span class="links"><a data-repo href="https://github.com/TuppySeal/Pelagic">GitHub</a><a data-releases href="https://github.com/TuppySeal/Pelagic/releases">Releases</a><a href="#top">Back to top ↑</a></span></div></footer>
+<footer><div class="wrap"><span>Pelagic · a student project · 2026</span><span class="links"><a href="#privacy">Privacy</a><a href="#faq">FAQ</a><a data-repo href="https://github.com/TuppySeal/Pelagic">GitHub</a><a data-issues href="https://github.com/TuppySeal/Pelagic/issues">Report a bug</a><a data-releases href="https://github.com/TuppySeal/Pelagic/releases">Releases</a><a href="#top">Back to top ↑</a></span></div></footer>
+
+<dialog class="after" id="after" aria-labelledby="after-title">
+  <div class="in">
+    <button class="x" type="button" data-close aria-label="Close">&times;</button>
+    <h2 id="after-title">Almost there</h2>
+    <p class="sub">Your download should be starting. Here's what to do next.</p>
+    <div id="after-windows">
+      <ol>
+        <li>Open <code>PelagicSetup-1.0.0.0.exe</code> from your Downloads folder or the browser's download bar.</li>
+        <li>Windows may show the blue screen below. Click <b>More info</b>, then <b>Run anyway</b>. It shows up because the installer isn't code-signed yet.
+          <div class="ss" aria-hidden="true">
+            <div class="t">Windows protected your PC</div>
+            <div>Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.</div>
+            <span class="m">More info</span>
+            <div class="row"><span class="run">Run anyway</span><span>Don't run</span></div>
+          </div>
+          <p class="ss-cap">What it looks like. "Run anyway" appears after you click "More info".</p>
+        </li>
+        <li>Follow the installer, then open Pelagic from the Start menu. Add an AI key in Settings whenever you like.</li>
+      </ol>
+    </div>
+    <div id="after-linux" hidden>
+      <ol>
+        <li>Unpack it: <code>tar xzf Pelagic-1.0.0-linux-x86_64.tar.gz</code></li>
+        <li>In the unpacked folder, run <code>./install.sh</code>. No sudo needed.</li>
+        <li>Open Pelagic from your applications menu.</li>
+      </ol>
+    </div>
+    <div class="retry">Download didn't start? <a id="after-retry" href="#">Try again</a> or get it from <a data-releases href="https://github.com/TuppySeal/Pelagic/releases">GitHub Releases</a>.</div>
+    <button class="btn ok" type="button" data-close>Got it</button>
+  </div>
+</dialog>
 
 <script>
 // Where the buttons point. For a new version, change these lines (and the file names, sizes and hashes above).
@@ -255,11 +355,46 @@ document.querySelectorAll("[data-download]").forEach(function (a) { a.href = DOW
 document.querySelectorAll("[data-repo]").forEach(function (a) { a.href = REPO_URL; });
 document.querySelectorAll("[data-releases]").forEach(function (a) { a.href = REPO_URL + "/releases"; });
 
-// Linux visitors get the Linux file from the top bar button.
-if (/Linux/.test(navigator.platform || navigator.userAgent) && !/Android/.test(navigator.userAgent)) {
+document.querySelectorAll("[data-issues]").forEach(function (a) { a.href = REPO_URL + "/issues"; });
+
+// Match the main buttons to the visitor's computer.
+var ua = navigator.userAgent, plat = navigator.platform || "";
+var isMobile = /Android|iPhone|iPad|iPod/.test(ua) || (/Mac/.test(plat) && navigator.maxTouchPoints > 1);
+var isLinux = !isMobile && /Linux/.test(plat || ua) && !/CrOS/.test(ua);
+var isOther = isMobile || /Mac/.test(plat) || /CrOS/.test(ua);
+if (isLinux) {
+  // Linux visitors: Linux button first and big, in the hero and the top bar.
   var topBtn = document.getElementById("topdl");
   topBtn.setAttribute("data-download", "linux"); topBtn.href = DOWNLOADS.linux;
+  var win = document.getElementById("opt-windows"), lin = document.getElementById("opt-linux");
+  win.parentNode.insertBefore(lin, win);
+  lin.querySelector(".btn").className = "btn big";
+  win.querySelector(".btn").className = "btn alt";
+} else if (isOther) {
+  // Mac, phones, tablets and Chromebooks: say plainly there's no version for them yet.
+  document.getElementById("osnote").hidden = false;
 }
+
+// After a download click, show the "Almost there" steps. The download itself still starts normally.
+var after = document.getElementById("after"), lastOs = "windows";
+function showAfter(os) {
+  if (!after || typeof after.showModal !== "function") return;
+  lastOs = os;
+  document.getElementById("after-windows").hidden = os !== "windows";
+  document.getElementById("after-linux").hidden = os !== "linux";
+  if (!after.open) after.showModal();
+}
+document.querySelectorAll("[data-download]").forEach(function (a) {
+  a.addEventListener("click", function () {
+    var os = a.getAttribute("data-download");
+    setTimeout(function () { showAfter(os); }, 300);
+  });
+});
+document.getElementById("after-retry").addEventListener("click", function (e) {
+  e.preventDefault(); location.href = DOWNLOADS[lastOs];
+});
+after.querySelectorAll("[data-close]").forEach(function (b) { b.addEventListener("click", function () { after.close(); }); });
+after.addEventListener("click", function (e) { if (e.target === after) after.close(); });
 
 document.querySelectorAll(".hash .copy").forEach(function (b) {
   b.addEventListener("click", function () {

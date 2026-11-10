@@ -5,5 +5,7 @@
   "compatibility_date": "2026-11-09",
   "assets": {
     "directory": "./website"
-  }
+  },
+  // Lets Cloudflare build a preview of each pull request (npx wrangler preview needs this block, even empty).
+  "previews": {}
 }
