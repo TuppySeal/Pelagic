@@ -72,6 +72,10 @@ It makes a packaging virtual environment (`packaging/.venv-linux`), installs the
 
 Linux-specific behaviour: data is in `$XDG_DATA_HOME/AtlasBrowser` (normally `~/.local/share/AtlasBrowser`; an existing `~/AtlasBrowser` is still used). Secrets use `atlasbrowser/secretbox.py`: a random key in the system keyring through the `keyring` package, or with `PELAGIC_PASSWORD_STORE=basic` a mode-600 key file. Tests set `PELAGIC_PASSWORD_STORE=basic` so they never touch your keyring; `python tests/secretbox_test.py` checks this on any system.
 
+## Version numbers
+
+Releases use three-part versions, x.y.z, for both Windows and Linux: `PelagicSetup-x.y.z.exe`, `PelagicUpdate-x.y.z.exe` and `Pelagic-x.y.z-linux-x86_64.tar.gz`, under the release tag `vx.y.z`. To set a new version, change it in `atlasbrowser/__init__.py` and in `packaging/version_info.txt` (the `FileVersion` and `ProductVersion` strings, and `filevers`/`prodvers` as `(x, y, z, 0)`); both build scripts read the version from there. Add the release to CHANGELOG.md. The first release (v1.0.0.0) is the only four-part one.
+
 Publish generated installers as GitHub release assets. The current full installer is:
 
 https://github.com/TuppySeal/Pelagic/releases/download/v1.0.0.0/PelagicSetup-1.0.0.0.exe

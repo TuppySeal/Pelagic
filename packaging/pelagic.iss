@@ -2,7 +2,8 @@
 ; Browser data in %LOCALAPPDATA%\AtlasBrowser (profiles, passwords, keys) is never touched by setup or uninstall.
 #define AppName "Pelagic"
 #define AppExe "Pelagic.exe"
-#define AppVersion GetVersionNumbersString(AddBackslash(SourcePath) + "..\dist\Pelagic\Pelagic.exe")
+; Three-part version (x.y.z, the same as the Linux tarball): ProductVersion from packaging\version_info.txt.
+#define AppVersion GetStringFileInfo(AddBackslash(SourcePath) + "..\dist\Pelagic\Pelagic.exe", "ProductVersion")
 
 [Setup]
 AppId={{6B0F3C55-2E1A-4D8B-9A57-0C9E4F7A1D23}

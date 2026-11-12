@@ -4,12 +4,14 @@ All notable changes to Pelagic are listed here, newest first. Downloads for each
 [Releases page](https://github.com/TuppySeal/Pelagic/releases). For everything Pelagic can do, see
 [FEATURES.md](FEATURES.md).
 
-Versions use the same four-part number as the Windows installer (`PelagicSetup-<version>.exe`).
+Versions are three-part numbers, x.y.z, the same for Windows (`PelagicSetup-<version>.exe`) and Linux
+(`Pelagic-<version>-linux-x86_64.tar.gz`), with release tags `v<version>`. The first release, 1.0.0.0, was the only
+one numbered with four parts.
 
 <!--
 How to add a version:
 1. Put changes under "Unreleased" as you make them, in the sections below (delete empty sections).
-2. When you publish a release, rename "Unreleased" to "[x.y.z.w] - YYYY-MM-DD", add a fresh empty
+2. When you publish a release, rename "Unreleased" to "[x.y.z] - YYYY-MM-DD", add a fresh empty
    "Unreleased" above it, and add a link for the new version at the bottom of this file.
 Sections: Added (new features), Changed (existing features that work differently), Fixed (bugs),
 Removed (features taken out), Security (anything that affects safety or privacy).
