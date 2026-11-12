@@ -100,6 +100,7 @@ class Store:
         "humanize": False,
         "batch": True,      # True: model may plan several actions per reply; False: strictly one at a time
         "token_saver": True,
+        "no_context": False,   # AI panel: send only the request and the always-on instructions (no chat, page, steps)
         "vision_every_step": False,
         "memory_file": "",  # Empty uses Atlas Memory.md in the app data folder; access is opt-in.
         "core_instructions": "",

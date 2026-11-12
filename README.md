@@ -19,6 +19,8 @@ Click the sparkle button (Ctrl+Shift+A). Add keys under the gear. Keys are encry
 
 The panel is the **agent**: describe a task or ask a question; it opens pages, clicks, types and scrolls while you watch (purple glow on the page) and answers from what it finds. Stop any time. Right-click selected text for "Ask Pelagic AI".
 
+**Options and usage → No context** saves tokens on repetitive tasks: the agent still sees the page it's on but remembers only its last step, and questions send just your message, with no earlier messages, page text or notes. Your always-on instructions are always sent.
+
 The agent never tries to solve or get around CAPTCHAs. When one appears it stops and asks you to solve it in the page, then carries on when you press Send.
 
 Providers: Gemini, Anthropic, OpenAI, OpenRouter, Groq, Mistral, DeepSeek, xAI, Together, Fireworks, Cerebras, SambaNova, NVIDIA NIM, Perplexity, Cohere, Hugging Face, GitHub Models, Hyperbolic, Nebius, SiliconFlow, Novita, Moonshot, Zhipu, Qwen, Ollama, LM Studio, plus any custom OpenAI-/Anthropic-/Gemini-compatible endpoint.
@@ -126,6 +128,8 @@ For devices with self-signed certificates (for example, `https://10.0.255.1`), P
 `python tests/passwords_test.py` checks the encrypted store, save/update prompts, autofill, private-window and agent rules, and the Google import.
 
 `python tests/focused_typing_test.py` checks that the agent types whole blocks of text and pastes formatted (Markdown or HTML) text into focused editors inside other sites' frames, and still refuses password and card fields.
+
+`python tests/no_context_test.py` checks what the No context option leaves out of chat and agent requests.
 
 `python tests/network_test.py` checks the proxy setting (through a local test proxy), blocked domains in pages, page parts and private windows, downloaded blocklists, the blocked page and its Unblock link.
 

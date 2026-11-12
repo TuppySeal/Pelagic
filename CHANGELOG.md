@@ -20,6 +20,9 @@ Removed (features taken out), Security (anything that affects safety or privacy)
 ## [Unreleased]
 
 ### Added
+- **No context** in the AI panel's Options and usage: for repetitive tasks, sends only your request and your
+  always-on instructions. The agent still sees the page it's working on but remembers only its last step; questions
+  leave out earlier messages, page text and notes.
 - **Formatted text from the AI agent**: the agent can paste text with formatting (bold, italics, headings, lists,
   links, paragraphs), written as Markdown or HTML, into rich text editors, including ones inside other sites'
   frames. Plain text boxes get the text without the markup, and your clipboard isn't used.

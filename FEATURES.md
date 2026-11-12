@@ -10,7 +10,8 @@ Linux. This page is the quick list; the [README](README.md) explains how to use 
 - **Ask Pelagic AI** on any selected text from the right-click menu.
 - **Bring your own key** for 25+ providers: Gemini, Anthropic, OpenAI, OpenRouter, Groq, Mistral, DeepSeek, xAI,
   Ollama, LM Studio and more, plus any OpenAI-, Anthropic- or Gemini-compatible endpoint. Keys are encrypted.
-- **Token and cost tracking** for each task.
+- **Token and cost tracking** for each task, and a **No context** option for repetitive tasks that sends only your
+  request and always-on instructions.
 - **Pelagic Local**: a rule-based helper for simple browser tasks with no AI, no network and no tokens.
 - **Safety built in**: the agent never types passwords or sees card fields, asks before buying, sending, deleting
   or posting, treats page text as data rather than instructions, and hands CAPTCHAs back to you.

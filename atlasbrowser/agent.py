@@ -233,6 +233,7 @@ class Agent(QObject):
         self.humanize = bool(store.get("humanize"))
         self.batch = bool(store.get("batch"))
         self.token_saver = store.get("token_saver") is not False
+        self.no_context = bool(store.get("no_context"))   # remember only the last step (repetitive tasks)
         self.meter = None   # usage.Meter set by the panel
         self.max_steps = int(store.get("max_steps") or 30)
 
@@ -387,6 +388,8 @@ class Agent(QObject):
 
     # ------------------------------------------------------------ think
     def _messages(self, obs: str):
+        if getattr(self, "no_context", False):
+            return self._minimal_messages(obs)
         if self.token_saver:
             return self._compact_messages(obs)
         first = f"TASK: {self.task}"
@@ -402,6 +405,24 @@ class Agent(QObject):
                 result = result[:160] + "…"
             msgs.append({"role": "assistant", "content": text})
             msgs.append({"role": "user", "content": f"RESULT: {result}"})
+        msgs.append({"role": "user", "content": obs})
+        return msgs
+
+    def _minimal_messages(self, obs: str):
+        """No context mode: the task, the user's decisions, the last step and the page; nothing older."""
+        first = f"TASK: {self.task}"
+        decisions = list(dict.fromkeys(
+            _compact_action(record) + " -> " + result
+            for record, result in self.turns
+            if result.startswith("The user replied: ") or "The user declined" in result))
+        if decisions:
+            first += "\n\nUser decisions (still apply):\n" + "\n".join(decisions)
+        if len(self.turns) > 1:
+            first += f"\n\n({len(self.turns) - 1} earlier steps done; only the last one is shown. Work from the page.)"
+        msgs = [{"role": "user", "content": first}]
+        for record, result in self.turns[-1:]:
+            msgs.append({"role": "assistant", "content": _compact_action(record)})
+            msgs.append({"role": "user", "content": "RESULT: " + _head_tail(result, 4000)})
         msgs.append({"role": "user", "content": obs})
         return msgs
 

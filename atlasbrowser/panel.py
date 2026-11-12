@@ -294,6 +294,12 @@ class AIPanel(QWidget):
         opt.setSpacing(4)
         lay.addWidget(self.options)
 
+        self.no_context = QCheckBox("No context: only my message and always-on instructions")
+        self.no_context.setChecked(bool(store.get("no_context")))
+        self.no_context.setToolTip("Saves tokens on repetitive tasks. Chat and Compare send just your message and "
+                                   "your always-on instructions: no earlier messages, page text or notes. The agent "
+                                   "still sees the page it's working on, but remembers only its last step.")
+        self.no_context.toggled.connect(self._set_no_context)
         self.page_ctx = QCheckBox("Let the AI read the page I'm on")
         self.page_ctx.setChecked(True)
         self.page_ctx.setToolTip("Sends the text of the current page with your question, so you can ask about it.")
@@ -338,9 +344,10 @@ class AIPanel(QWidget):
         size_row.addWidget(self.size_slider, 1)
         size_row.addWidget(self.size_label)
         opt.addLayout(size_row)
-        for w in (self.page_ctx, self.token_saver, self.batch, self.vision, self.vision_every_step, self.human,
-                  self.use_memory):
+        for w in (self.no_context, self.page_ctx, self.token_saver, self.batch, self.vision, self.vision_every_step,
+                  self.human, self.use_memory):
             opt.addWidget(w)
+        self._set_no_context(self.no_context.isChecked(), save=False)
         btns = QHBoxLayout()
         btns.addWidget(self.save_memory)
         btns.addWidget(core_button)
@@ -723,6 +730,8 @@ class AIPanel(QWidget):
         self.status.setText("Saved to memory. It will be read only when you request it.")
 
     def _memory_system(self, memory: str) -> str:
+        if self._no_context():
+            return ""
         if not memory:
             return ""
         notes = _clip(memory, 8000) if self.store.get("token_saver") is not False else memory
@@ -890,9 +899,18 @@ class AIPanel(QWidget):
             return None
         return key
 
+    def _set_no_context(self, on, save=True):
+        if save:
+            self.store.set("no_context", bool(on))
+        for w in (self.page_ctx, self.use_memory):   # these don't apply while No context is on
+            w.setEnabled(not on)
+
+    def _no_context(self) -> bool:
+        return self.no_context.isChecked()
+
     def _page_context(self, cb):
         tab = self.win.current_tab()
-        if not (self.page_ctx.isChecked() and tab):
+        if self._no_context() or not (self.page_ctx.isChecked() and tab):
             cb(None)
             return
 
@@ -930,7 +948,7 @@ class AIPanel(QWidget):
             if gen != self._gen or not self.busy:
                 return
             saving = self.store.get("token_saver") is not False
-            msgs = chat_messages(self.history, saving)
+            msgs = [dict(self.history[-1])] if self._no_context() else chat_messages(self.history, saving)
             system = self._context_system(ctx, text) + self._memory_system(memory) + core_system(self.store)
             self._show_context(estimate_context(msgs, system) + (2048 if saving else 4096))
 
