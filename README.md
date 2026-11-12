@@ -19,6 +19,10 @@ Click the sparkle button (Ctrl+Shift+A). Add keys under the gear. Keys are encry
 
 The panel is the **agent**: describe a task or ask a question; it opens pages, clicks, types and scrolls while you watch (purple glow on the page) and answers from what it finds. Stop any time. Right-click selected text for "Ask Pelagic AI".
 
+**Always-on instructions** sit above the chat: tick *Always-on* to send them with every request (untick to pause), pick a set from the list to switch, and *Edit…* to make one set per activity (homework, shopping, work) and rename or delete them. They're shared by all profiles.
+
+The agent can **group tabs** for you ("put my maths tabs in a group called School", "group my tabs by site", "ungroup Shopping").
+
 **Options and usage → No context** saves tokens on repetitive tasks: the agent still sees the page it's on but remembers only its last step, and questions send just your message, with no earlier messages, page text or notes. Your always-on instructions are always sent.
 
 The agent never tries to solve or get around CAPTCHAs. When one appears it stops and asks you to solve it in the page, then carries on when you press Send.
@@ -128,6 +132,8 @@ For devices with self-signed certificates (for example, `https://10.0.255.1`), P
 `python tests/passwords_test.py` checks the encrypted store, save/update prompts, autofill, private-window and agent rules, and the Google import.
 
 `python tests/focused_typing_test.py` checks that the agent types whole blocks of text and pastes formatted (Markdown or HTML) text into focused editors inside other sites' frames, and still refuses password and card fields.
+
+`python tests/instruction_sets_test.py` checks always-on instruction sets (switch, pause, edit) and the agent's tab grouping.
 
 `python tests/no_context_test.py` checks what the No context option leaves out of chat and agent requests.
 

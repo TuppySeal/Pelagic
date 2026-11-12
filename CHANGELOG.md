@@ -20,6 +20,10 @@ Removed (features taken out), Security (anything that affects safety or privacy)
 ## [Unreleased]
 
 ### Added
+- **Always-on instruction sets**: keep several named sets (one per activity), switch between them from the AI
+  panel, and pause or resume them with the *Always-on* tick box. Your existing instructions become the first set.
+- **The agent can group tabs**: into a named, coloured group, by site, or ungroup them; it also sees which group
+  each tab is in.
 - **No context** in the AI panel's Options and usage: for repetitive tasks, sends only your request and your
   always-on instructions. The agent still sees the page it's working on but remembers only its last step; questions
   leave out earlier messages, page text and notes.

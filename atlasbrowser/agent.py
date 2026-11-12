@@ -39,6 +39,9 @@ Actions:
 - extract {}                                 read the full text of the current page (up to 15k chars)
 - back {} | forward {} | wait {"seconds": 2}
 - new_tab {"url": "https://..."} | switch_tab {"index": N} | close_tab {}
+- group_tabs {"tabs": [0, 2], "name": "Research", "color": "Blue|Grey|Red|Yellow|Green|Pink|Purple|Cyan|Orange"}
+                                             put tabs (indexes from Tabs) in a named group; an existing name adds to it
+- group_by_site {} | ungroup_tabs {"name": "Research"}   sort tabs into groups by site; or dissolve a group
 - watch {"name": "...", "url": "https://..." (default: this page), "every": 60, "when": {condition},
          "steps": [optional actions to run before each check], "then": ["notify","ask_ai","agent"],
          "ask": "question for you once it matches", "task": "agent task if then has agent"}
@@ -355,8 +358,13 @@ class Agent(QObject):
 
     def _format(self, snap, tab) -> str:
         tabs = self.win.tab_list()
+        groups = getattr(getattr(self.win, "strip", None), "groups", {}) or {}
+
+        def group(t):
+            g = groups.get(getattr(t, "_group", None))
+            return f" {{group: {g.get('name') or 'unnamed'}}}" if g else ""
         lines = ["CURRENT PAGE", "Tabs: " + " | ".join(
-            f"[{i}]{'*' if t is tab else ''} {t.title()[:40] or 'New tab'}" for i, t in enumerate(tabs))]
+            f"[{i}]{'*' if t is tab else ''} {t.title()[:40] or 'New tab'}{group(t)}" for i, t in enumerate(tabs))]
         if not snap:
             lines.append(f"URL: {tab.url().toString()}")
             lines.append("(This page has no readable content yet — it may still be loading, or is a built-in "
@@ -1074,6 +1082,46 @@ class Agent(QObject):
         self.win.close_tab_obj(tab)
         self.tab = self.win.current_tab()
         self._result("Closed the tab.", settle=False, ok=True)
+
+    def _do_group_tabs(self, tab, args):
+        from .tabstrip import GROUP_COLORS
+        strip, tabs = self.win.strip, self.win.tab_list()
+        raw = args.get("tabs", args.get("indexes", []))
+        idx = [self._int({"i": v}, "i") for v in (raw if isinstance(raw, list) else [raw])]
+        chosen = [tabs[i] for i in dict.fromkeys(idx) if i is not None and 0 <= i < len(tabs)]
+        if not chosen:
+            self._result("group_tabs needs \"tabs\": a list of tab indexes from Tabs.", settle=False)
+            return
+        name = str(args.get("name") or "").strip()[:40]
+        color = str(args.get("color") or "").strip().title()
+        color = GROUP_COLORS.get(color) if color in GROUP_COLORS else None
+        gid = next((g for g, v in strip.groups.items() if name and v.get("name", "").lower() == name.lower()), None)
+        if gid:
+            for t in chosen:
+                strip.add_to_group(t, gid)
+            if color:
+                strip.set_group(gid, color=color)
+            verb = "Added"
+        else:
+            strip.new_group(chosen, name, color)
+            verb = "Grouped"
+        if hasattr(self.win, "save_session"):
+            self.win.save_session()
+        self._result(f"{verb} {len(chosen)} tab(s) in group \u201c{name or 'unnamed'}\u201d.", settle=False, ok=True)
+
+    def _do_group_by_site(self, tab, args):
+        moved = self.win.strip.group_by_site()
+        self._result(f"Grouped tabs by site ({moved} tab(s) moved).", settle=False, ok=True)
+
+    def _do_ungroup_tabs(self, tab, args):
+        strip, name = self.win.strip, str(args.get("name") or "").strip().lower()
+        gids = [g for g, v in strip.groups.items() if (v.get("name") or "").lower() == name]
+        if not gids:
+            self._result(f"No group named \u201c{args.get('name')}\u201d.", settle=False)
+            return
+        for g in gids:
+            strip.ungroup(g)
+        self._result(f"Ungrouped \u201c{args.get('name')}\u201d.", settle=False, ok=True)
 
     def _confirm_watch(self, summary: str) -> bool:
         """Always ask before an AI-created background automation starts (it keeps running after the task)."""

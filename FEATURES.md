@@ -10,6 +10,8 @@ Linux. This page is the quick list; the [README](README.md) explains how to use 
 - **Ask Pelagic AI** on any selected text from the right-click menu.
 - **Bring your own key** for 25+ providers: Gemini, Anthropic, OpenAI, OpenRouter, Groq, Mistral, DeepSeek, xAI,
   Ollama, LM Studio and more, plus any OpenAI-, Anthropic- or Gemini-compatible endpoint. Keys are encrypted.
+- **Always-on instruction sets**: one set per activity, switched or paused from the AI panel in one click.
+- The agent can **group tabs** by name or by site, and ungroup them.
 - **Token and cost tracking** for each task, and a **No context** option for repetitive tasks that sends only your
   request and always-on instructions.
 - **Pelagic Local**: a rule-based helper for simple browser tasks with no AI, no network and no tokens.

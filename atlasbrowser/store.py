@@ -77,7 +77,7 @@ from .secretbox import KeyringMissing, _dpapi, protect, unprotect  # noqa: E402,
 # AI provider and agent settings shared by every profile (they live in the first profile's settings.json).
 SHARED_SETTINGS = {"selected", "overrides", "custom", "multi", "model_cache", "price_overrides", "max_steps", "vision",
                    "vision_every_step", "humanize", "batch", "token_saver", "guard", "confirm_all", "context_limit",
-                   "core_instructions", "proxy"}   # proxy: the browser engine has one proxy for every profile
+                   "core_instructions", "core_sets", "core_active", "core_enabled", "proxy"}   # proxy: the browser engine has one proxy for every profile
 
 
 class Store:
@@ -104,6 +104,9 @@ class Store:
         "vision_every_step": False,
         "memory_file": "",  # Empty uses Atlas Memory.md in the app data folder; access is opt-in.
         "core_instructions": "",
+        "core_sets": [],         # named always-on instruction sets (context.py)
+        "core_active": "",
+        "core_enabled": True,
         "context_limit": 128000,  # User-configurable reference, not auto-detected model capacity.
         "price_overrides": {},  # provider:model -> USD per million tokens
         "model_cache": {},  # provider id -> model names fetched from the provider

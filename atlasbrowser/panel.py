@@ -16,14 +16,14 @@ from PySide6.QtGui import QColor, QFont, QTextBlockFormat, QTextCursor, QTextDoc
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QPlainTextEdit,
                                QPushButton, QSizePolicy, QTextBrowser, QVBoxLayout, QWidget,
                                QDialog, QDialogButtonBox, QFormLayout, QSlider, QStackedWidget, QSpinBox, QProgressBar, QToolButton,
-                               QScrollArea, QFrame)
+                               QScrollArea, QFrame, QMessageBox)
 
 from . import icons, localai, pagejs, providers, pwguard
 from .agent import Agent, run_in_pool
 from .automation import LocalRunner, describe_spec, new_spec
 from .usage import Meter, UsageLog, format_cost
 from .memory import MemoryFile
-from .context import core_system, estimate_context
+from .context import active_set, core_enabled, core_system, estimate_context, instruction_sets, save_sets
 
 CHAT_SYSTEM = ("You are Pelagic, the AI assistant built into the user's web browser. Answer clearly and concisely in "
                "Markdown. When page content is provided, base your answers on it and say so if it does not contain "
@@ -227,6 +227,25 @@ class AIPanel(QWidget):
         self.compare_list.setToolTip("Tick the AI services to ask")
         self.compare_list.itemChanged.connect(self._save_multi)
         lay.addWidget(self.compare_list)
+
+        # always-on instructions: on/off and which set, one click away
+        core_row = QHBoxLayout()
+        core_row.setSpacing(4)
+        self.core_on = QCheckBox("Always-on")
+        self.core_on.setToolTip("Send your always-on instructions with every request. Untick to pause them.")
+        self.core_on.toggled.connect(self._core_toggled)
+        self.core_box = QComboBox()
+        self.core_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.core_box.setToolTip("Which set of always-on instructions to use (one per activity)")
+        self.core_box.activated.connect(self._core_picked)
+        core_edit = QPushButton("Edit…")
+        core_edit.setToolTip("Add, rename, edit or delete instruction sets")
+        core_edit.clicked.connect(self._edit_core)
+        core_row.addWidget(self.core_on)
+        core_row.addWidget(self.core_box, 1)
+        core_row.addWidget(core_edit)
+        lay.addLayout(core_row)
+        self._refresh_core()
 
         views = QHBoxLayout()
         views.setSpacing(4)
@@ -681,34 +700,50 @@ class AIPanel(QWidget):
         self.context_bar.setFormat('Context: no request yet')
         self._greet()
 
+    # ------------------------------------------------------------ always-on instruction sets
+    def _refresh_core(self):
+        sets, cur = instruction_sets(self.store), active_set(self.store)
+        self.core_box.blockSignals(True)
+        self.core_box.clear()
+        for st in sets:
+            self.core_box.addItem(st["name"], st["name"])
+        if not sets:
+            self.core_box.addItem("No instructions yet: click Edit…", "")
+        self.core_box.setCurrentIndex(max(0, self.core_box.findData(cur["name"]) if cur else 0))
+        self.core_box.setEnabled(bool(sets))
+        self.core_box.blockSignals(False)
+        self.core_on.blockSignals(True)
+        self.core_on.setChecked(core_enabled(self.store) and bool(sets))
+        self.core_on.setEnabled(bool(sets))
+        self.core_on.blockSignals(False)
+        if cur:
+            self.core_box.setToolTip(f"{cur['name']}:\n{cur.get('text', '')[:400]}")
+
+    def _core_changed(self, message: str):
+        if self.agent:
+            self.agent.core_instructions = core_system(self.store)
+        self.status.setText(message)
+
+    def _core_toggled(self, on):
+        self.store.set("core_enabled", bool(on))
+        self._core_changed("Always-on instructions are on." if on else "Always-on instructions are paused.")
+
+    def _core_picked(self, index):
+        name = self.core_box.itemData(index)
+        if name:
+            save_sets(self.store, instruction_sets(self.store), name)
+            self._refresh_core()
+            self._core_changed(f"Using the \u201c{name}\u201d instructions"
+                               + ("." if core_enabled(self.store) else " (paused: tick Always-on to use them)."))
+
     def _edit_core(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle('Persistent core instructions')
-        dialog.resize(520, 360)
-        layout = QVBoxLayout(dialog)
-        note = QLabel('Saved across restarts and included in every request.\nCurrent requests take precedence. Only save instructions you want sent to your AI provider.')
-        note.setWordWrap(True)
-        layout.addWidget(note)
-        editor = QPlainTextEdit(str(self.store.get('core_instructions') or ''))
-        editor.setPlaceholderText('Example: Keep working toward the task. Verify each chess move before continuing.')
-        layout.addWidget(editor)
-        layout.addWidget(QLabel('Model context capacity in tokens (reference for estimated indicator):'))
-        limit = QSpinBox()
-        limit.setRange(1024, 10000000)
-        limit.setValue(int(self.store.get('context_limit') or 128000))
-        layout.addWidget(limit)
-        buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
-        layout.addWidget(buttons)
+        dialog = CoreSetsDialog(self.store, self)
         if dialog.exec() == QDialog.Accepted:
-            self.store.set('core_instructions', editor.toPlainText().strip())
-            self.store.set('context_limit', limit.value())
-            if self.agent:
-                self.agent.core_instructions = core_system(self.store)
+            dialog.commit()
+            self._refresh_core()
             if hasattr(self, '_context_used'):
                 self._show_context(self._context_used)
-            self.status.setText('Core instructions saved; included in every future request.')
+            self._core_changed('Always-on instructions saved; used in every future request while switched on.')
 
     def _show_context(self, used):
         self._context_used = used
@@ -1134,3 +1169,132 @@ class AIPanel(QWidget):
             self.send(f"Explain or summarize this text from the page:\n\n> {text[:3000]}")
         else:
             self.send("Summarize this page: key points first, then anything noteworthy.")
+
+
+class CoreSetsDialog(QDialog):
+    """Named sets of always-on instructions: one per activity, switched from the panel."""
+
+    def __init__(self, store, parent=None):
+        super().__init__(parent)
+        self.store = store
+        self.setWindowTitle("Always-on instructions")
+        self.resize(640, 420)
+        self.sets = [dict(s) for s in instruction_sets(store)]
+        cur = active_set(store)
+        self.active = cur["name"] if cur else ""
+        note = QLabel("Sent with every request while switched on. Make one set per activity and switch between them "
+                      "in the AI panel. Your current request takes precedence. Only save what you want sent to your "
+                      "AI provider.")
+        note.setWordWrap(True)
+        note.setObjectName("muted")
+        self.names = QListWidget()
+        self.names.setMaximumWidth(200)
+        self.names.currentRowChanged.connect(self._show)
+        self.editor = QPlainTextEdit()
+        self.editor.setPlaceholderText("Example: Keep working toward the task. Verify each answer before moving on.")
+        self.editor.textChanged.connect(self._store_text)
+        add, rename, delete = QPushButton("New set"), QPushButton("Rename"), QPushButton("Delete")
+        add.clicked.connect(self._add)
+        rename.clicked.connect(self._rename)
+        delete.clicked.connect(self._delete)
+        side = QVBoxLayout()
+        side.addWidget(self.names, 1)
+        for b in (add, rename, delete):
+            side.addWidget(b)
+        body = QHBoxLayout()
+        body.addLayout(side)
+        body.addWidget(self.editor, 1)
+        self.enabled = QCheckBox("Use always-on instructions (untick to pause them)")
+        self.enabled.setChecked(core_enabled(store))
+        limit_row = QHBoxLayout()
+        limit_row.addWidget(QLabel("Model context capacity in tokens (for the estimate):"))
+        self.limit = QSpinBox()
+        self.limit.setRange(1024, 10000000)
+        self.limit.setValue(int(store.get("context_limit") or 128000))
+        limit_row.addWidget(self.limit)
+        limit_row.addStretch(1)
+        buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        lay = QVBoxLayout(self)
+        lay.addWidget(note)
+        lay.addLayout(body, 1)
+        lay.addWidget(self.enabled)
+        lay.addLayout(limit_row)
+        lay.addWidget(buttons)
+        self._fill()
+        if not self.sets:
+            self._add("My instructions")
+
+    def _fill(self, select: str | None = None):
+        self.names.blockSignals(True)
+        self.names.clear()
+        for s in self.sets:
+            self.names.addItem(("● " if s["name"] == self.active else "   ") + s["name"])
+        self.names.blockSignals(False)
+        names = [s["name"] for s in self.sets]
+        want = select or self.active
+        self.names.setCurrentRow(names.index(want) if want in names else (0 if names else -1))
+        self._show(self.names.currentRow())
+
+    def _show(self, row):
+        self.editor.blockSignals(True)
+        self.editor.setPlainText(self.sets[row].get("text", "") if 0 <= row < len(self.sets) else "")
+        self.editor.setEnabled(0 <= row < len(self.sets))
+        self.editor.blockSignals(False)
+
+    def _store_text(self):
+        row = self.names.currentRow()
+        if 0 <= row < len(self.sets):
+            self.sets[row]["text"] = self.editor.toPlainText()
+
+    def _ask_name(self, title, current=""):
+        from PySide6.QtWidgets import QInputDialog
+        name, ok = QInputDialog.getText(self, title, "Name (for example Homework or Shopping):", text=current)
+        name = name.strip()[:40] if ok else ""
+        if name and name != current and any(s["name"] == name for s in self.sets):
+            QMessageBox.warning(self, title, "There's already a set with that name.")
+            return ""
+        return name
+
+    def _add(self, name=None):
+        name = name if isinstance(name, str) and name else self._ask_name("New set")
+        if not name:
+            return
+        self.sets.append({"name": name, "text": ""})
+        if not self.active:
+            self.active = name
+        self._fill(name)
+        self.editor.setFocus()
+
+    def _rename(self):
+        row = self.names.currentRow()
+        if not 0 <= row < len(self.sets):
+            return
+        old = self.sets[row]["name"]
+        name = self._ask_name("Rename set", old)
+        if name and name != old:
+            self.sets[row]["name"] = name
+            if self.active == old:
+                self.active = name
+            self._fill(name)
+
+    def _delete(self):
+        row = self.names.currentRow()
+        if not 0 <= row < len(self.sets):
+            return
+        name = self.sets[row]["name"]
+        if QMessageBox.question(self, "Delete set", f"Delete the \u201c{name}\u201d instructions?") != QMessageBox.Yes:
+            return
+        self.sets.pop(row)
+        if self.active == name:
+            self.active = self.sets[0]["name"] if self.sets else ""
+        self._fill()
+
+    def commit(self):
+        """Saves the sets (the panel calls this when the dialog is accepted)."""
+        row = self.names.currentRow()
+        if 0 <= row < len(self.sets):
+            self.active = self.sets[row]["name"]   # the set you were editing becomes the one in use
+        save_sets(self.store, [s for s in self.sets if s["name"]], self.active, self.enabled.isChecked())
+        self.store.set("context_limit", self.limit.value())
