@@ -36,8 +36,6 @@ $iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:LOCALAPPDATA\P
 if ($iscc) {
     & $iscc /Q "$here\pelagic.iss"
     if ($LASTEXITCODE) { throw 'Inno Setup failed' }
-    & $iscc /Q /DUpdater "$here\pelagic.iss"
-    if ($LASTEXITCODE) { throw 'Inno Setup (updater) failed' }
 } else {
     Write-Host 'Inno Setup 6 not found; skipped the installer step.'
 }

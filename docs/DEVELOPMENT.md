@@ -58,7 +58,7 @@ Install the requirements into the Python environment used for the build, then ru
 powershell -File packaging/build.ps1
 ```
 
-The build script uses a packaging virtual environment with access to installed system packages, installs PyInstaller and yt-dlp, downloads FFmpeg, and builds dist/Pelagic. Install Inno Setup 6 to produce the installer and updater as well. This build has network dependencies and is not a pinned reproducible build.
+The build script uses a packaging virtual environment with access to installed system packages, installs PyInstaller and yt-dlp, downloads FFmpeg, and builds dist/Pelagic. Install Inno Setup 6 to produce the installer as well. (The separate PelagicUpdate updater is no longer built; `ISCC /DUpdater packaging/pelagic.iss` still makes one if ever needed.) This build has network dependencies and is not a pinned reproducible build.
 
 ## Build for Linux
 
@@ -74,7 +74,7 @@ Linux-specific behaviour: data is in `$XDG_DATA_HOME/AtlasBrowser` (normally `~/
 
 ## Version numbers
 
-Releases use three-part versions, x.y.z, for both Windows and Linux: `PelagicSetup-x.y.z.exe`, `PelagicUpdate-x.y.z.exe` and `Pelagic-x.y.z-linux-x86_64.tar.gz`, under the release tag `vx.y.z`. To set a new version, change it in `atlasbrowser/__init__.py` and in `packaging/version_info.txt` (the `FileVersion` and `ProductVersion` strings, and `filevers`/`prodvers` as `(x, y, z, 0)`); both build scripts read the version from there. Add the release to CHANGELOG.md. The first release (v1.0.0.0) is the only four-part one.
+Releases use three-part versions, x.y.z, for both Windows and Linux: `PelagicSetup-x.y.z.exe` and `Pelagic-x.y.z-linux-x86_64.tar.gz`, under the release tag `vx.y.z`. To set a new version, change it in `atlasbrowser/__init__.py` and in `packaging/version_info.txt` (the `FileVersion` and `ProductVersion` strings, and `filevers`/`prodvers` as `(x, y, z, 0)`); both build scripts read the version from there. Add the release to CHANGELOG.md. The first release (v1.0.0.0) is the only four-part one.
 
 Publish generated installers as GitHub release assets. The current full installer is:
 
