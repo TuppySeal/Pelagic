@@ -34,7 +34,8 @@ PAGES = {
     "/": lambda: (f"<title>Lesson</title><body style='margin:0'><p>Part C</p>"
                   f"<iframe id=ed src='http://localhost:{OTHER['port']}/editor' width=500 height=150></iframe>"
                   f"<iframe id=pw src='http://localhost:{OTHER['port']}/pw' width=300 height=60></iframe>"
-                  f"<iframe id=cc src='http://localhost:{OTHER['port']}/card' width=300 height=60></iframe></body>"),
+                  f"<iframe id=cc src='http://localhost:{OTHER['port']}/card' width=300 height=60></iframe>"
+                  f"<br><textarea id=plain style='width:300px;height:60px'></textarea></body>"),
     # what TinyMCE puts in its frame: an editable body
     "/editor": lambda: "<body id=tinymce contenteditable=true aria-label='Rich Text Area' "
                        "style='margin:0;height:140px'><p><br></p></body>",
@@ -157,6 +158,42 @@ def main():
     got = frame_js(tab, "/editor", "document.body.innerText")
     check("humanize mode types it letter by letter into the same editor", (got or "").strip() == "word by word",
           repr(got))
+
+    # formatted text: pasted with its formatting, without using the user's clipboard
+    state.humanize = False
+    QApplication.clipboard().setText("the user's own clipboard")
+    frame_js(tab, "/editor", "document.body.innerHTML='<p><br></p>'")
+    tab.real_click(*centre(tab, 'ed'))
+    pump(400)
+    results.clear()
+    state._paste_formatted = lambda t, i, text, fmt, submit: Agent._paste_formatted(state, t, i, text, fmt, submit)
+    Agent._do_type(state, tab, {"text": "**Bold start** and *italic*\n\n- first point\n- second point",
+                                "format": "markdown"})
+    wait_until(lambda: results, 5)
+    pump(300)
+    got = frame_js(tab, "/editor", "document.body.innerHTML") or ""
+    check("markdown is pasted with its formatting into the editor in another site's frame",
+          results and results[-1].startswith("Pasted") and "markdown formatting" in results[-1] and ("<strong>Bold start</strong>" in got or "<b>Bold start</b>" in got)
+          and ("<em>italic</em>" in got or "<i>italic</i>" in got) and got.count("<li") == 2, f"{results} {got[:300]}")
+    check("the user's clipboard isn't touched", QApplication.clipboard().text() == "the user's own clipboard",
+          QApplication.clipboard().text())
+    tab.real_click(*centre(tab, 'plain'))
+    pump(300)
+    results.clear()
+    Agent._do_type(state, tab, {"text": "<p>Hello <b>there</b></p>", "format": "html"})
+    wait_until(lambda: results, 5)
+    pump(300)
+    out = []
+    tab.page().runJavaScript("document.getElementById('plain').value", 0, out.append)
+    wait_until(lambda: out, 5)
+    check("a plain text box gets the text without the markup", out and out[0].strip() == "Hello there", out)
+    tab.real_click(*centre(tab, 'pw'))
+    pump(300)
+    results.clear()
+    Agent._do_type(state, tab, {"text": "**secret**", "format": "markdown"})
+    wait_until(lambda: results, 5)
+    check("formatted paste into a password box is refused", results and "never type passwords" in results[-1]
+          and frame_js(tab, "/pw", "document.getElementById('p').value") == "", results)
 
     results.clear()
     Agent._do_press_key(state, SimpleNamespace(press_key=lambda k: False), {"key": "ince my doctor"})

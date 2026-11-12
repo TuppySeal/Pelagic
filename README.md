@@ -125,7 +125,7 @@ For devices with self-signed certificates (for example, `https://10.0.255.1`), P
 
 `python tests/passwords_test.py` checks the encrypted store, save/update prompts, autofill, private-window and agent rules, and the Google import.
 
-`python tests/focused_typing_test.py` checks that the agent types whole blocks of text into focused editors inside other sites' frames, and still refuses password and card fields.
+`python tests/focused_typing_test.py` checks that the agent types whole blocks of text and pastes formatted (Markdown or HTML) text into focused editors inside other sites' frames, and still refuses password and card fields.
 
 `python tests/network_test.py` checks the proxy setting (through a local test proxy), blocked domains in pages, page parts and private windows, downloaded blocklists, the blocked page and its Unblock link.
 

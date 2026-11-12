@@ -412,22 +412,24 @@ class BrowserTab(QWebEngineView):
                 return
             state["done"] = True
             infos = []
-            for raw in got:
+            for frame, raw in got:
                 try:
-                    infos.append(json.loads(raw))
+                    info = json.loads(raw)
                 except (TypeError, ValueError):
-                    pass
+                    continue
+                info["_frame"] = frame   # where the field is (paste_rich runs there)
+                infos.append(info)
             # a secret or card field anywhere in focus wins, so a wrong guess can never type into one
             hit = next((i for i in infos if i.get("focus") and (i.get("secret") or i.get("card"))), None) or \
                 next((i for i in infos if i.get("focus") and i.get("field")), None)
             cb(hit)
 
-        def one(raw):
-            got.append(raw)
+        def one(frame, raw):
+            got.append((frame, raw))
             if len(got) == len(frames):
                 finish()
         for f in frames:
-            f.runJavaScript(pagejs.FOCUSED_FIELD, _APP_WORLD, one)
+            f.runJavaScript(pagejs.FOCUSED_FIELD, _APP_WORLD, lambda raw, f=f: one(f, raw))
         QTimer.singleShot(timeout_ms, finish)
 
     def type_text(self, text: str):
@@ -447,6 +449,14 @@ class BrowserTab(QWebEngineView):
             elif ch.isprintable():   # accents, emoji: a key press that carries the character itself
                 for kind in (QEvent.Type.KeyPress, QEvent.Type.KeyRelease):
                     QApplication.sendEvent(w, QKeyEvent(kind, Qt.Key_unknown, Qt.KeyboardModifier.NoModifier, ch))
+
+    def paste_rich(self, frame, html_text: str, plain: str, done=None):
+        """Pastes formatted text into the focused field of frame (from focused_field) the way a paste reaches the
+        page: editors such as TinyMCE get a paste event with the HTML; plain editable areas get the HTML inserted;
+        text boxes get the plain text. The user's clipboard is never touched."""
+        from . import pagejs
+        frame.runJavaScript(pagejs.call(pagejs.PASTE_HTML, html_text, plain), _APP_WORLD,
+                            lambda raw: done(raw) if done else None)
 
     def press_key(self, spec: str) -> bool:
         parts = [p for p in spec.replace(" ", "").split("+") if p]

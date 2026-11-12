@@ -412,6 +412,41 @@ FOCUSED_FIELD = r"""
 })()
 """
 
+# Formatted text into the focused field of this frame: a paste event first (rich editors handle it), then the
+# browser's own insert commands, which keep undo and fire the page's input events.
+PASTE_HTML = r"""
+((html, plain) => {
+  let el = document.activeElement;
+  while (el && el.shadowRoot && el.shadowRoot.activeElement) el = el.shadowRoot.activeElement;
+  if (!el) return JSON.stringify({ ok: false, err: 'Nothing has the keyboard.' });
+  const tag = el.tagName.toLowerCase();
+  const rich = el.isContentEditable;
+  let handled = false;
+  try {
+    const dt = new DataTransfer();
+    dt.setData('text/html', html);
+    dt.setData('text/plain', plain);
+    const ev = new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true });
+    handled = !el.dispatchEvent(ev);
+  } catch (e) {}
+  if (handled) return JSON.stringify({ ok: true, how: 'editor' });
+  if (rich) {
+    const ok = document.execCommand('insertHTML', false, html);
+    return JSON.stringify({ ok: !!ok, how: 'html', err: ok ? '' : 'The editor did not accept the text.' });
+  }
+  if (tag === 'input' || tag === 'textarea') {
+    if (!document.execCommand('insertText', false, plain)) {
+      const proto = tag === 'textarea' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      const s = el.selectionStart ?? el.value.length, e = el.selectionEnd ?? el.value.length;
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, el.value.slice(0, s) + plain + el.value.slice(e));
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    return JSON.stringify({ ok: true, how: 'text' });
+  }
+  return JSON.stringify({ ok: false, err: 'The focused element is not a text field.' });
+})(%s)
+"""
+
 # Visible pointer that glides to the target before the agent clicks or types.
 CURSOR_MOVE = r"""
 ((x, y, ms) => {

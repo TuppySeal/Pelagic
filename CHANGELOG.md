@@ -20,6 +20,9 @@ Removed (features taken out), Security (anything that affects safety or privacy)
 ## [Unreleased]
 
 ### Added
+- **Formatted text from the AI agent**: the agent can paste text with formatting (bold, italics, headings, lists,
+  links, paragraphs), written as Markdown or HTML, into rich text editors, including ones inside other sites'
+  frames. Plain text boxes get the text without the markup, and your clipboard isn't used.
 - **Blocked domains (like Pi-hole)**: Settings → Privacy → *Edit blocked domains…*, or the puzzle menu → *Block
   example.com everywhere…*. Blocks whole domains and their subdomains as pages and inside other pages, with your own
   list, downloadable hosts-file or domain blocklists (StevenBlack, OISD, Hagezi), a *Never block* list, and a

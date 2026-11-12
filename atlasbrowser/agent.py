@@ -31,6 +31,8 @@ Actions:
 - type {"id": N, "text": "...", "submit": true|false}   replace the contents of field N; submit presses Enter
 - type {"text": "..."}                       no id: type the whole text into the field that has the keyboard (click it
                                              first, by id or x/y): rich text editors and fields inside frames
+  add "format": "markdown" or "html" to paste formatted text (bold, italics, headings, lists, links, paragraphs)
+  into a rich text editor, e.g. {"text": "**Summary:** two parts\\n\\n- first\\n- second", "format": "markdown"}
 - select {"id": N, "value": "option text"}   choose an option in a dropdown
 - press_key {"key": "Enter|Tab|Escape|ArrowDown|PageDown|Control+A|..."}
 - scroll {"direction": "down|up", "pages": 1}   scroll by viewport heights (more content may be off-screen)
@@ -795,6 +797,10 @@ class Agent(QObject):
         text = args.get("text", "")
         text = "" if text is None else str(text)
         submit = args.get("submit") in (True, "true", "True", 1)
+        fmt = str(args.get("format") or "").lower().strip()
+        if fmt in ("markdown", "md", "html", "rich"):
+            self._paste_formatted(tab, i, text, "html" if fmt == "html" else "markdown", submit)
+            return
         if i is None:
             self._type_focused(tab, text, submit)
             return
@@ -857,6 +863,64 @@ class Agent(QObject):
                 return fail(info)
             self._cursor_to(tab, info["x"], info["y"], lambda: moved(info))
         tab.run_js(pagejs.call(pagejs.ELEMENT_RECT, i), got)
+
+    def _paste_formatted(self, tab, i, text, fmt, submit):
+        """type with "format": paste the text with its formatting into field i, or into the focused field."""
+        token = self._token
+        from .fileview import markdown_to_html
+        from PySide6.QtGui import QTextDocument
+        html_text = text if fmt == "html" else markdown_to_html(text)
+        doc = QTextDocument()
+        doc.setHtml(html_text)
+        plain = doc.toPlainText()
+
+        def paste(info):
+            if token != self._token or not self.running:
+                return
+            if not info:
+                return self._result("Nothing has the keyboard to paste into. Click into the field first (by id, or by "
+                                    "x/y for an editor that has no id), then type again.", settle=False)
+            if info.get("secret"):
+                return self._result("I never type passwords. Use ask_user so the user can enter it themselves.",
+                                    settle=False)
+            if info.get("card"):
+                return self._result("I never type card details. Use ask_user so the user can enter them.",
+                                    settle=False)
+
+            def pasted(raw):
+                if token != self._token or not self.running:
+                    return
+                try:
+                    res = json.loads(raw)
+                except (TypeError, ValueError):
+                    res = {"ok": False, "err": "The page did not respond."}
+                if not res.get("ok"):
+                    return self._result(res.get("err") or "Pasting failed.", settle=False)
+                if submit:
+                    tab.press_key("Enter")
+                kind = "as plain text (the field has no formatting)" if res.get("how") == "text" else f"with {fmt} formatting"
+                self._finish_nav(tab, f"Pasted {len(plain)} characters {kind} into "
+                                      f"\u201c{info.get('label') or 'field'}\u201d. Look at the page to check it.")
+            tab.paste_rich(info["_frame"], html_text, plain, pasted)
+
+        if i is None:
+            tab.focused_field(paste)
+            return
+
+        def focused(raw):
+            try:
+                f = json.loads(raw)
+            except (TypeError, ValueError):
+                f = None
+            if token != self._token or not self.running:
+                return
+            if not f or not f.get("ok"):
+                if f and f.get("err") == "password":
+                    return self._result("I never type passwords. Use ask_user so the user can enter it themselves.",
+                                        settle=False)
+                return self._result((f or {}).get("err", "The page did not respond."), settle=False)
+            tab.focused_field(paste)
+        tab.run_js(pagejs.call(pagejs.FOCUS_CLEAR, i), focused)
 
     def _type_focused(self, tab, text, submit):
         """type without an id: into the field that has the keyboard, in any frame (for example a rich text editor
