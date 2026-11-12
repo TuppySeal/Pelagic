@@ -392,6 +392,26 @@ INSERT_CHAR = r"""
   el.dispatchEvent(new Event('input', { bubbles: true })); return true; })(%s)
 """
 
+# Which field has the keyboard in this frame (run in every frame): for typing into an editor without an id, such as
+# a rich text box inside a frame. Secret and card fields are refused.
+FOCUSED_FIELD = r"""
+(() => { """ + _SECRET + r"""
+  if (!document.hasFocus()) return JSON.stringify({ focus: false });
+  let el = document.activeElement;
+  while (el && el.shadowRoot && el.shadowRoot.activeElement) el = el.shadowRoot.activeElement;
+  if (!el || el === document.body && !document.body.isContentEditable) return JSON.stringify({ focus: true, field: false });
+  const tag = el.tagName.toLowerCase();
+  if (tag === 'iframe' || tag === 'frame') return JSON.stringify({ focus: true, field: false, frame: true });
+  const type = (el.getAttribute('type') || 'text').toLowerCase();
+  const ac = (el.getAttribute('autocomplete') || '').toLowerCase().trim().split(/\s+/).pop() || '';
+  const card = /^cc-/.test(ac) || /card.?num|cc.?num|cardnumber|cvc|cvv|csc|security.?code/i.test((el.name || '') + ' ' + (el.id || ''));
+  const field = el.isContentEditable || tag === 'textarea' ||
+    (tag === 'input' && !['checkbox', 'radio', 'button', 'submit', 'reset', 'image', 'file', 'range', 'color', 'hidden'].includes(type));
+  return JSON.stringify({ focus: true, field: !!field, secret: isSecret(el), card: !!card,
+    label: (el.getAttribute('aria-label') || el.placeholder || el.name || el.title || tag).slice(0, 60) });
+})()
+"""
+
 # Visible pointer that glides to the target before the agent clicks or types.
 CURSOR_MOVE = r"""
 ((x, y, ms) => {

@@ -30,6 +30,9 @@ Removed (features taken out), Security (anything that affects safety or privacy)
 ### Changed
 
 ### Fixed
+- The AI agent can type a whole block of text into a field that has no id in its element list, such as a rich text editor
+  (TinyMCE) inside another site's frame: it clicks into the field, then types the text in one action instead of
+  one key at a time. Password and card fields are still refused.
 
 ## [1.0.0.0] - 2026-11-05
 

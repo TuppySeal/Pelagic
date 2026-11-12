@@ -29,6 +29,8 @@ Actions:
 - click {"id": N}                            click element N from the list
 - click {"x": 535, "y": 455}                 click a visible point in CSS viewport pixels (origin: page top-left)
 - type {"id": N, "text": "...", "submit": true|false}   replace the contents of field N; submit presses Enter
+- type {"text": "..."}                       no id: type the whole text into the field that has the keyboard (click it
+                                             first, by id or x/y): rich text editors and fields inside frames
 - select {"id": N, "value": "option text"}   choose an option in a dropdown
 - press_key {"key": "Enter|Tab|Escape|ArrowDown|PageDown|Control+A|..."}
 - scroll {"direction": "down|up", "pages": 1}   scroll by viewport heights (more content may be off-screen)
@@ -791,11 +793,11 @@ class Agent(QObject):
     def _do_type(self, tab, args):
         i = self._int(args)
         text = args.get("text", "")
-        if i is None:
-            self._result("type needs an id or a target label.", settle=False)
-            return
         text = "" if text is None else str(text)
         submit = args.get("submit") in (True, "true", "True", 1)
+        if i is None:
+            self._type_focused(tab, text, submit)
+            return
         token = self._token
 
         def finish():
@@ -856,6 +858,36 @@ class Agent(QObject):
             self._cursor_to(tab, info["x"], info["y"], lambda: moved(info))
         tab.run_js(pagejs.call(pagejs.ELEMENT_RECT, i), got)
 
+    def _type_focused(self, tab, text, submit):
+        """type without an id: into the field that has the keyboard, in any frame (for example a rich text editor
+        inside another site's frame, which has no id in the element list)."""
+        token = self._token
+
+        def got(info):
+            if token != self._token or not self.running:
+                return
+            if not info:
+                self._result("Nothing has the keyboard to type into. Click into the field first (by id, or by x/y "
+                             "for an editor that has no id), then type again without an id.", settle=False)
+            elif info.get("secret"):
+                self._result("I never type passwords. Use ask_user so the user can enter it themselves.", settle=False)
+            elif info.get("card"):
+                self._result("I never type card details. Use ask_user so the user can enter them.", settle=False)
+            else:
+                def finish():
+                    if token != self._token or not self.running:
+                        return
+                    if submit:
+                        tab.press_key("Enter")
+                    self._finish_nav(tab, f"Typed {len(text)} characters into the focused field "
+                                          f"“{info.get('label') or 'field'}”" + (" and pressed Enter." if submit else "."))
+                if self.humanize and len(text) <= 600:
+                    self._type_chars(tab, text, finish)
+                else:
+                    tab.type_text(text)
+                    QTimer.singleShot(150, finish)
+        tab.focused_field(got)
+
     def _do_select(self, tab, args):
         i = self._int(args)
         if i is None:
@@ -879,7 +911,9 @@ class Agent(QObject):
         if tab.press_key(key):
             self._finish_nav(tab, f"Pressed {key}.")
         else:
-            self._result(f"Unsupported key '{key}'.", settle=False)
+            hint = (' press_key takes one key name (Enter, Tab, a, Control+A). To enter text use type {"text": "..."}: '
+                    "without an id it types into the field that has the keyboard." if len(key.split("+")[-1]) > 1 else "")
+            self._result(f"Unsupported key '{key[:40]}'.{hint}", settle=False)
 
     def _do_scroll(self, tab, args):
         direction = "up" if str(args.get("direction", "down")).lower() == "up" else "down"

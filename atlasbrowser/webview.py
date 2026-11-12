@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import base64
+import json
 
 from PySide6.QtCore import QBuffer, QCryptographicHash, QEvent, QIODevice, QPoint, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QAction, QColor, QFocusEvent, QPainter
+from PySide6.QtGui import QAction, QColor, QFocusEvent, QKeyEvent, QPainter
 from PySide6.QtTest import QTest
 from PySide6.QtWebEngineCore import (QWebEngineCertificateError, QWebEnginePage, QWebEngineProfile,
                                      QWebEngineScript, QWebEngineSettings, QWebEnginePermission)
@@ -393,6 +394,59 @@ class BrowserTab(QWebEngineView):
         else:
             from . import pagejs
             self.run_js(pagejs.call(pagejs.INSERT_CHAR, ch))
+
+    def focused_field(self, cb, timeout_ms: int = 1500):
+        """cb(info) with the field that has the keyboard, in whichever frame it is (frames from other sites
+        included): {"field": bool, "secret": bool, "card": bool, "label": str}, or None if nothing has it."""
+        from . import pagejs
+        frames, stack = [], [self.page().mainFrame()]
+        while stack:
+            f = stack.pop()
+            if f.isValid():
+                frames.append(f)
+                stack.extend(f.children())
+        got, state = [], {"done": False}
+
+        def finish():
+            if state["done"]:
+                return
+            state["done"] = True
+            infos = []
+            for raw in got:
+                try:
+                    infos.append(json.loads(raw))
+                except (TypeError, ValueError):
+                    pass
+            # a secret or card field anywhere in focus wins, so a wrong guess can never type into one
+            hit = next((i for i in infos if i.get("focus") and (i.get("secret") or i.get("card"))), None) or \
+                next((i for i in infos if i.get("focus") and i.get("field")), None)
+            cb(hit)
+
+        def one(raw):
+            got.append(raw)
+            if len(got) == len(frames):
+                finish()
+        for f in frames:
+            f.runJavaScript(pagejs.FOCUSED_FIELD, _APP_WORLD, one)
+        QTimer.singleShot(timeout_ms, finish)
+
+    def type_text(self, text: str):
+        """Real key presses for the whole text, all at once, into whatever has the keyboard (any frame)."""
+        w = self._target()
+        if not w.hasFocus():
+            w.setFocus(Qt.FocusReason.OtherFocusReason)
+        if not w.window().isActiveWindow():
+            QApplication.sendEvent(w, QFocusEvent(QEvent.Type.FocusIn, Qt.FocusReason.ActiveWindowFocusReason))
+        for ch in text:
+            if ch in "\r\n":
+                QTest.keyClick(w, Qt.Key_Return, Qt.KeyboardModifier.NoModifier)
+            elif ch == "\t":
+                QTest.keyClick(w, Qt.Key_Tab, Qt.KeyboardModifier.NoModifier)
+            elif ch.isascii() and ch.isprintable():
+                QTest.keyClick(w, ch, Qt.KeyboardModifier.NoModifier)
+            elif ch.isprintable():   # accents, emoji: a key press that carries the character itself
+                for kind in (QEvent.Type.KeyPress, QEvent.Type.KeyRelease):
+                    QApplication.sendEvent(w, QKeyEvent(kind, Qt.Key_unknown, Qt.KeyboardModifier.NoModifier, ch))
 
     def press_key(self, spec: str) -> bool:
         parts = [p for p in spec.replace(" ", "").split("+") if p]
